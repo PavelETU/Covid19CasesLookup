@@ -2,7 +2,6 @@ package com.wordpress.covid19caseslookup
 
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +15,7 @@ class MainActivity : AppCompatActivity() {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(LookupViewModel::class.java)) {
-                    return LookupViewModel(LookUpRepoImpl()) as T
+                    return LookupViewModel(LookUpRepoImpl(), application) as T
                 }
                 throw IllegalArgumentException("Unknown ViewModel class ")
             }
@@ -28,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         viewModel.start()
-        viewModel.countries.observe(this, Observer<List<Country>> { displayCountries(it) })
+        viewModel.listToDisplay.observe(this, Observer<List<String>> { displayCountries(it) })
         viewModel.showError.observe(this, Observer { showError ->
             error_view.visible(showError)
             country_spinner.visible(!showError)
@@ -36,11 +35,8 @@ class MainActivity : AppCompatActivity() {
         error_view.setOnClickListener { viewModel.start() }
     }
 
-    private fun displayCountries(countries: List<Country>) {
-        country_spinner.adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_item).also {
-            it.add(getString(R.string.choose_country))
-            it.addAll(countries.map { country -> country.Country })
-        }
+    private fun displayCountries(countries: List<String>) {
+        country_spinner.adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, countries)
     }
 }
 
