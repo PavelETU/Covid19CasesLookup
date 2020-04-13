@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Covid 19 Cases Lookup</string>
+    <string name="choose_country">Choose a country</string>
 </resources>
