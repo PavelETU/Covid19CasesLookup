@@ -9,6 +9,10 @@ class LookUpRepoImpl: LookupRepo {
         .build().create(LookupService::class.java)
 
     override suspend fun getCountries(): List<Country> {
-        return lookupService.getCountries()
+        return try {
+            lookupService.getCountries()
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 }

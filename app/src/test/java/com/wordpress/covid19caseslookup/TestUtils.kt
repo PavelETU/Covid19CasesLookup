@@ -5,8 +5,8 @@ import androidx.lifecycle.Observer
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-fun <T> LiveData<T>.waitForValueToSet() {
-    val latch = CountDownLatch(1)
+fun <T> LiveData<T>.waitForValueToSet(times: Int = 1) {
+    val latch = CountDownLatch(times)
     val observer = object : Observer<T> {
         override fun onChanged(t: T) {
             latch.countDown()
