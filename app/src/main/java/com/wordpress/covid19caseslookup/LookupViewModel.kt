@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 
 class LookupViewModel(private val lookupRepo: LookupRepo) : ViewModel() {
     val countries = MutableLiveData<List<Country>>()
-    val showError = MutableLiveData<Boolean>().apply { value = false }
+    val showError = MutableLiveData<Boolean>()
     fun start() {
         viewModelScope.launch {
             val countries = lookupRepo.getCountries()

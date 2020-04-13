@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Covid 19 Cases Lookup</string>
     <string name="choose_country">Choose a country</string>
+    <string name="something_went_wrong_tap_to_retry">Something went wrong. Tap to retry</string>
 </resources>

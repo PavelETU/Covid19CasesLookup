@@ -55,7 +55,7 @@ class ViewModelTest {
 
         viewModel.start()
         viewModel.countries.waitForValueToSet()
-        viewModel.showError.waitForValueToSet(2)
+        viewModel.showError.waitForValueToSet()
 
         assertTrue(viewModel.showError.value!!)
     }
