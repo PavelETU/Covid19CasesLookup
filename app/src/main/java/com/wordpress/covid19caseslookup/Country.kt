@@ -1,3 +1,7 @@
 package com.wordpress.covid19caseslookup
 
-data class Country(val Country: String, val Slug: String, val ISO2: String)
+import com.google.gson.annotations.SerializedName
+
+data class Country(@SerializedName("Country") val country: String,
+                   @SerializedName("Slug") val slug: String,
+                   @SerializedName("ISO2") val iso: String)

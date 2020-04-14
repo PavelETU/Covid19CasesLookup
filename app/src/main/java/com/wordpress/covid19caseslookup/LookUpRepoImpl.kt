@@ -15,4 +15,12 @@ class LookUpRepoImpl: LookupRepo {
             emptyList()
         }
     }
+
+    override suspend fun getCountrySummary(countrySlug: String): List<CountryStats> {
+        return try {
+            lookupService.getStatForCountry(countrySlug)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
 }
