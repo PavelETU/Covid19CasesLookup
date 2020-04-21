@@ -123,4 +123,15 @@ class ViewModelTest {
 
         assertEquals(listOfCountries[1].slug, repo.lastCountrySlugUsed)
     }
+
+    @Test
+    fun `when location is obtained right country preselected`() {
+        viewModel.start()
+        viewModel.countries.waitForValueToSet()
+
+        viewModel.onLocationObtained("Ireland")
+        viewModel.displayedPositionInList.waitForValueToSet()
+
+        assertEquals(3, viewModel.displayedPositionInList.value)
+    }
 }

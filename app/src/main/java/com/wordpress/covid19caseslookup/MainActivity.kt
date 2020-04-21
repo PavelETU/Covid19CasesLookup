@@ -1,15 +1,24 @@
 package com.wordpress.covid19caseslookup
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_main.*
+
+const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
 class MainActivity : AppCompatActivity() {
     private val viewModel by viewModels<LookupViewModel> {
@@ -24,6 +33,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -35,6 +46,12 @@ class MainActivity : AppCompatActivity() {
         })
         viewModel.statToDisplay.observe(this, Observer { stats.text = it })
         error_view.setOnClickListener { viewModel.start() }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        } else {
+            initLocation()
+        }
+        viewModel.displayedPositionInList.observe(this, Observer { country_spinner.setSelection(it) })
     }
 
     private fun displayCountries(countries: List<String>) {
@@ -51,6 +68,26 @@ class MainActivity : AppCompatActivity() {
                 viewModel.onItemSelected(position)
             }
 
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && grantResults.getOrNull(0) == PackageManager.PERMISSION_GRANTED) {
+            initLocation()
+        }
+    }
+
+    private fun initLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient.lastLocation.addOnSuccessListener {
+            if (Geocoder.isPresent()) {
+                viewModel.onLocationObtained(Geocoder(this)
+                    .getFromLocation(it.latitude, it.longitude, 1).getOrNull(0)?.countryName)
+            }
         }
     }
 }

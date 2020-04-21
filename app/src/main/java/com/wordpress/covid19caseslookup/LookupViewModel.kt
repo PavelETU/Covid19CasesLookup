@@ -12,6 +12,27 @@ class LookupViewModel(private val lookupRepo: LookupRepo, private val appForCont
     }
     val statToDisplay = MutableLiveData<String>()
     val showError = MutableLiveData<Boolean>()
+    val displayedPositionInList = MediatorLiveData<Int>()
+    private var country = MutableLiveData<String>()
+
+    init{
+        displayedPositionInList.addSource(countries) {
+            displayedPositionInList.removeSource(countries)
+            if (country.value != null) {
+                if (!it.isNullOrEmpty()) {
+                    val index = it.indexOfFirst { elementToCheck -> elementToCheck.country.contentEquals(country.value!!) }
+                    if (index != -1) displayedPositionInList.value = index + 1
+                }
+            }
+        }
+        displayedPositionInList.addSource(country) {
+            displayedPositionInList.removeSource(country)
+            if (!countries.value.isNullOrEmpty()) {
+                val index = countries.value!!.indexOfFirst { elementToCheck -> elementToCheck.country.contentEquals(country.value!!) }
+                if (index != -1) displayedPositionInList.value = index + 1
+            }
+        }
+    }
 
     fun start() {
         viewModelScope.launch {
@@ -31,4 +52,11 @@ class LookupViewModel(private val lookupRepo: LookupRepo, private val appForCont
             statToDisplay.value = appForContext.getString(R.string.stats_to_display, stats.confirmed, stats.deaths, stats.recovered)
         }
     }
+
+    fun onLocationObtained(countryName: String?) {
+        countryName ?: return
+        country.value = countryName
+    }
+
+
 }
