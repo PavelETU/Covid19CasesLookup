@@ -1,5 +1,7 @@
-package com.wordpress.covid19caseslookup
+package com.wordpress.covid19caseslookup.data
 
+import com.wordpress.covid19caseslookup.data.entities.Country
+import com.wordpress.covid19caseslookup.data.entities.CountryStats
 import retrofit2.http.GET
 import retrofit2.http.Path
 

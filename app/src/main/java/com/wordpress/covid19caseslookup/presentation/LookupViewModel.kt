@@ -1,7 +1,10 @@
-package com.wordpress.covid19caseslookup
+package com.wordpress.covid19caseslookup.presentation
 
 import android.app.Application
 import androidx.lifecycle.*
+import com.wordpress.covid19caseslookup.R
+import com.wordpress.covid19caseslookup.data.LookupRepo
+import com.wordpress.covid19caseslookup.data.entities.Country
 import kotlinx.coroutines.launch
 
 class LookupViewModel(private val lookupRepo: LookupRepo, private val appForContext: Application) : AndroidViewModel(appForContext) {

@@ -2,6 +2,9 @@ package com.wordpress.covid19caseslookup
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.wordpress.covid19caseslookup.data.entities.Country
+import com.wordpress.covid19caseslookup.data.entities.CountryStats
+import com.wordpress.covid19caseslookup.presentation.LookupViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -27,14 +30,40 @@ class ViewModelTest {
     private lateinit var viewModel: LookupViewModel
     private lateinit var repo: FakeRepo
     private val listOfCountries = listOf(
-        Country("Croatia", "croatia", "HR"),
-        Country("Kiribati", "kiribati", "KI"),
-        Country("Ireland","ireland","IE"),
-        Country("Russian Federation","russia","RU")
+        Country(
+            "Croatia",
+            "croatia",
+            "HR"
+        ),
+        Country(
+            "Kiribati",
+            "kiribati",
+            "KI"
+        ),
+        Country(
+            "Ireland",
+            "ireland",
+            "IE"
+        ),
+        Country(
+            "Russian Federation",
+            "russia",
+            "RU"
+        )
     )
     private val countryStatsList = listOf(
-        CountryStats(65324, 64, 8756, "2020-04-03T00:00:00Z"),
-        CountryStats(100324, 100, 10000, "2020-04-04T00:00:00Z")
+        CountryStats(
+            65324,
+            64,
+            8756,
+            "2020-04-03T00:00:00Z"
+        ),
+        CountryStats(
+            100324,
+            100,
+            10000,
+            "2020-04-04T00:00:00Z"
+        )
     )
 
     @Before
@@ -42,7 +71,11 @@ class ViewModelTest {
         MockitoAnnotations.initMocks(this)
         Dispatchers.setMain(fakeMainThread)
         repo = FakeRepo(listOfCountries, countryStatsList)
-        viewModel = LookupViewModel(repo, application)
+        viewModel =
+            LookupViewModel(
+                repo,
+                application
+            )
     }
 
     @After

@@ -1,4 +1,4 @@
-package com.wordpress.covid19caseslookup
+package com.wordpress.covid19caseslookup.data.entities
 
 import com.google.gson.annotations.SerializedName
 
