@@ -10,30 +10,19 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_main.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
 class MainActivity : AppCompatActivity() {
-    private val viewModel by viewModels<LookupViewModel> {
-        object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                if (modelClass.isAssignableFrom(LookupViewModel::class.java)) {
-                    return LookupViewModel(LookUpRepoImpl(), application) as T
-                }
-                throw IllegalArgumentException("Unknown ViewModel class ")
-            }
-        }
-    }
+    private val viewModel: LookupViewModel by viewModel()
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
