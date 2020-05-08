@@ -3,7 +3,7 @@ package com.wordpress.covid19caseslookup
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -15,11 +15,12 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import java.util.concurrent.Executors
 
 class ViewModelTest {
     @get:Rule
     var rule = InstantTaskExecutorRule()
-    private val fakeMainThread = newSingleThreadContext("Fake Android UI Thread")
+    private val fakeMainThread = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     @Mock
     private lateinit var application: Application
 

@@ -1,8 +1,11 @@
 package com.wordpress.covid19caseslookup
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
+import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -29,7 +32,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 throw IllegalArgumentException("Unknown ViewModel class ")
             }
-
         }
     }
 
@@ -46,16 +48,27 @@ class MainActivity : AppCompatActivity() {
         })
         viewModel.statToDisplay.observe(this, Observer { stats.text = it })
         error_view.setOnClickListener { viewModel.start() }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
         } else {
-            initLocation()
+            tryToGetLocation()
         }
-        viewModel.displayedPositionInList.observe(this, Observer { country_spinner.setSelection(it) })
+        viewModel.displayedPositionInList.observe(
+            this,
+            Observer { country_spinner.setSelection(it) })
     }
 
     private fun displayCountries(countries: List<String>) {
-        country_spinner.adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, countries)
+        country_spinner.adapter =
+            ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, countries)
         country_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
 
@@ -77,20 +90,35 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && grantResults.getOrNull(0) == PackageManager.PERMISSION_GRANTED) {
-            initLocation()
+            tryToGetLocation()
         }
     }
 
-    private fun initLocation() {
+    private fun tryToGetLocation() {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        //locationManager.location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         fusedLocationClient.lastLocation.addOnSuccessListener {
-            if (Geocoder.isPresent()) {
-                viewModel.onLocationObtained(Geocoder(this)
-                    .getFromLocation(it.latitude, it.longitude, 1).getOrNull(0)?.countryName)
-            }
+            it ?: return@addOnSuccessListener
+            processLocation(it)
+        }
+    }
+
+    private fun processLocation(location: Location) {
+        if (Geocoder.isPresent()) {
+            viewModel.onLocationObtained(
+                try {
+                    Geocoder(this)
+                        .getFromLocation(location.latitude, location.longitude, 1).getOrNull(0)
+                        ?.countryName
+                } catch (exception: Exception) {
+                    null
+                }
+            )
         }
     }
 }
+
 
 fun View.visible(visible: Boolean) {
     visibility = if (visible) View.VISIBLE else View.GONE

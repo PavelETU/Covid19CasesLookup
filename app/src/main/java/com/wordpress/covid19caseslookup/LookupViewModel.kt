@@ -17,7 +17,7 @@ class LookupViewModel(private val lookupRepo: LookupRepo, private val appForCont
 
     init{
         displayedPositionInList.addSource(countries) {
-            displayedPositionInList.removeSource(countries)
+            if (it.isNotEmpty()) displayedPositionInList.removeSource(countries)
             if (country.value != null) {
                 if (!it.isNullOrEmpty()) {
                     val index = it.indexOfFirst { elementToCheck -> elementToCheck.country.contentEquals(country.value!!) }
