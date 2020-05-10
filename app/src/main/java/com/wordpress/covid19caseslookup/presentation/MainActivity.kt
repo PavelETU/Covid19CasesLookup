@@ -1,15 +1,11 @@
 package com.wordpress.covid19caseslookup.presentation
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -31,47 +27,28 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         viewModel.start()
-        viewModel.listToDisplay.observe(this, Observer<List<String>> { displayCountries(it) })
+        viewModel.listToDisplay.observe(this, Observer { displayCountries(it) })
         viewModel.showError.observe(this, Observer { showError ->
             error_view.visible(showError)
-            country_spinner.visible(!showError)
         })
-        viewModel.statToDisplay.observe(this, Observer { stats.text = it })
+        viewModel.loading.observe(this, Observer { loading ->
+            loading_indicator.visible(loading)
+        })
         error_view.setOnClickListener { viewModel.start() }
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
-                LOCATION_PERMISSION_REQUEST_CODE
-            )
-        } else {
-            tryToGetLocation()
-        }
-        viewModel.displayedPositionInList.observe(
-            this,
-            Observer { country_spinner.setSelection(it) })
+        checkPermissionAndTryToGetLocation()
+        viewModel.displayedPositionInList.observe(this, Observer { highlightPosition(it) })
+        supportActionBar?.title = "Choose a country"
+    }
+
+    private fun checkPermissionAndTryToGetLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        else tryToGetLocation()
     }
 
     private fun displayCountries(countries: List<String>) {
-        country_spinner.adapter =
-            ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, countries)
-        country_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                viewModel.onItemSelected(position)
-            }
-
-        }
+        list_of_countries.visibility = View.VISIBLE
+        list_of_countries.adapter = CountriesAdapter(countries)
     }
 
     override fun onRequestPermissionsResult(
@@ -85,8 +62,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun tryToGetLocation() {
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        //locationManager.location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         fusedLocationClient.lastLocation.addOnSuccessListener {
             it ?: return@addOnSuccessListener
@@ -106,6 +81,10 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         }
+    }
+
+    private fun highlightPosition(position: Int) {
+        list_of_countries.scrollToPosition(position)
     }
 }
 

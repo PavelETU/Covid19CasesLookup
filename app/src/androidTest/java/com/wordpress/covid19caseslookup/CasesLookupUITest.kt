@@ -10,6 +10,7 @@ class CasesLookupUITest: CasesLookupRules() {
     fun listOfAvailableCountriesIsPresentedWhenAppIsOpened() {
         bddTestCase {
             givenIOpenTheApp()
+            iSeeATitle("Choose a country")
             iSeeListOfAvailableCountries()
         }
     }

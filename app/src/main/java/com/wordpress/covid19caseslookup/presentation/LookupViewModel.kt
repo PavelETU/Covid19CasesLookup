@@ -10,11 +10,11 @@ import kotlinx.coroutines.launch
 class LookupViewModel(private val lookupRepo: LookupRepo, private val appForContext: Application) : AndroidViewModel(appForContext) {
     val countries = MutableLiveData<List<Country>>()
     val listToDisplay: LiveData<List<String>> = countries.map {
-        val listTitle = appForContext.getString(R.string.choose_country)
-        listOf(listTitle).plus(it.map { country -> country.country } )
+        it.map { country -> country.country }
     }
     val statToDisplay = MutableLiveData<String>()
     val showError = MutableLiveData<Boolean>()
+    val loading = MutableLiveData<Boolean>()
     val displayedPositionInList = MediatorLiveData<Int>()
     private var country = MutableLiveData<String>()
 
@@ -24,7 +24,7 @@ class LookupViewModel(private val lookupRepo: LookupRepo, private val appForCont
             if (country.value != null) {
                 if (!it.isNullOrEmpty()) {
                     val index = it.indexOfFirst { elementToCheck -> elementToCheck.country.contentEquals(country.value!!) }
-                    if (index != -1) displayedPositionInList.value = index + 1
+                    if (index != -1) displayedPositionInList.value = index
                 }
             }
         }
@@ -32,26 +32,25 @@ class LookupViewModel(private val lookupRepo: LookupRepo, private val appForCont
             displayedPositionInList.removeSource(country)
             if (!countries.value.isNullOrEmpty()) {
                 val index = countries.value!!.indexOfFirst { elementToCheck -> elementToCheck.country.contentEquals(country.value!!) }
-                if (index != -1) displayedPositionInList.value = index + 1
+                if (index != -1) displayedPositionInList.value = index
             }
         }
     }
 
     fun start() {
+        showError.value = false
+        loading.value = true
         viewModelScope.launch {
             val countries = lookupRepo.getCountries()
-            this@LookupViewModel.countries.value = countries
-            showError.value = countries.isEmpty()
+            loading.value = false
+            if (countries.isEmpty()) showError.value = countries.isEmpty()
+            else this@LookupViewModel.countries.value = countries
         }
     }
 
     fun onItemSelected(position: Int) {
-        if (position == 0) {
-            statToDisplay.value = ""
-            return
-        }
         viewModelScope.launch {
-            val stats = lookupRepo.getCountrySummary(countries.value!![position - 1].slug).lastOrNull() ?: return@launch
+            val stats = lookupRepo.getCountrySummary(countries.value!![position].slug).lastOrNull() ?: return@launch
             statToDisplay.value = appForContext.getString(R.string.stats_to_display, stats.confirmed, stats.deaths, stats.recovered)
         }
     }

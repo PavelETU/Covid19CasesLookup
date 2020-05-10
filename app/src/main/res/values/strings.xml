@@ -2,5 +2,5 @@
     <string name="app_name">Covid 19 Cases Lookup</string>
     <string name="choose_country">Choose a country</string>
     <string name="stats_to_display">Confirmed %d, Deaths %d, Recovered %d</string>
-    <string name="something_went_wrong_tap_to_retry">Something went wrong. Tap to retry</string>
+    <string name="something_went_wrong_tap_to_retry">Something went wrong.\nTap to retry</string>
 </resources>

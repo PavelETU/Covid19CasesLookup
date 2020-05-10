@@ -71,11 +71,7 @@ class ViewModelTest {
         MockitoAnnotations.initMocks(this)
         Dispatchers.setMain(fakeMainThread)
         repo = FakeRepo(listOfCountries, countryStatsList)
-        viewModel =
-            LookupViewModel(
-                repo,
-                application
-            )
+        viewModel = LookupViewModel(repo, application)
     }
 
     @After
@@ -114,12 +110,11 @@ class ViewModelTest {
         viewModel.listToDisplay.waitForValueToSet()
 
         val values = viewModel.listToDisplay.value!!
-        assertEquals(listOfCountries.size + 1, values.size)
-        assertEquals(testTitle, values[0])
-        assertEquals(listOfCountries[0].country, values[1])
-        assertEquals(listOfCountries[1].country, values[2])
-        assertEquals(listOfCountries[2].country, values[3])
-        assertEquals(listOfCountries[3].country, values[4])
+        assertEquals(listOfCountries.size, values.size)
+        assertEquals(listOfCountries[0].country, values[0])
+        assertEquals(listOfCountries[1].country, values[1])
+        assertEquals(listOfCountries[2].country, values[2])
+        assertEquals(listOfCountries[3].country, values[3])
     }
 
     @Test
@@ -134,17 +129,6 @@ class ViewModelTest {
         viewModel.statToDisplay.waitForValueToSet()
 
         assertEquals(statsToDisplay, viewModel.statToDisplay.value)
-    }
-
-    @Test
-    fun `display empty stats if title is chosen`() {
-        viewModel.start()
-        viewModel.countries.waitForValueToSet()
-
-        viewModel.onItemSelected(0)
-        viewModel.statToDisplay.waitForValueToSet()
-
-        assertEquals("", viewModel.statToDisplay.value)
     }
 
     @Test
@@ -167,5 +151,16 @@ class ViewModelTest {
         viewModel.displayedPositionInList.waitForValueToSet()
 
         assertEquals(3, viewModel.displayedPositionInList.value)
+    }
+
+    @Test
+    fun `loading hiding on error`() {
+        repo.setCountries(emptyList())
+
+        viewModel.start()
+        viewModel.countries.waitForValueToSet()
+        viewModel.loading.waitForValueToSet()
+
+        assertEquals(false, viewModel.loading.value)
     }
 }
