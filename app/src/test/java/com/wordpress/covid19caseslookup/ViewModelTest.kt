@@ -6,6 +6,7 @@ import com.wordpress.covid19caseslookup.data.entities.Country
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
 import com.wordpress.covid19caseslookup.presentation.LookupViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -20,6 +21,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.util.concurrent.Executors
 
+@ExperimentalCoroutinesApi
 class ViewModelTest {
     @get:Rule
     var rule = InstantTaskExecutorRule()
@@ -37,7 +39,7 @@ class ViewModelTest {
         ),
         Country(
             "Kiribati",
-            "kiribati",
+            "",
             "KI"
         ),
         Country(
@@ -82,7 +84,6 @@ class ViewModelTest {
 
     @Test
     fun `after start call list is populated from fake repo`() {
-        viewModel.start()
         viewModel.countries.waitForValueToSet()
 
         val countriesFromViewModel = viewModel.countries.value!!
@@ -94,7 +95,6 @@ class ViewModelTest {
     fun `getting empty list country shows error`() {
         repo.setCountries(emptyList())
 
-        viewModel.start()
         viewModel.countries.waitForValueToSet()
         viewModel.showError.waitForValueToSet()
 
@@ -102,11 +102,32 @@ class ViewModelTest {
     }
 
     @Test
+    fun `empty slug cause snackbar to show up`() {
+        val noStatsString = "No Stats for country"
+        `when`(application.getString(R.string.no_stats)).thenReturn(noStatsString)
+        viewModel.countries.waitForValueToSet()
+
+        viewModel.onItemSelected(1)
+        viewModel.snackBarEvent.waitForValueToSet()
+
+        assertEquals(noStatsString, viewModel.snackBarEvent.value)
+    }
+
+    @Test
+    fun `right slug used`() {
+        viewModel.countries.waitForValueToSet()
+
+        viewModel.onItemSelected(2)
+        viewModel.openStatsEventWithSlug.waitForValueToSet()
+
+        assertEquals(listOfCountries[2].slug, viewModel.openStatsEventWithSlug.value)
+    }
+
+    @Test
     fun `after call list is populated from fake repo`() {
         val testTitle = "Test Title"
         `when`(application.getString(R.string.choose_country)).thenReturn(testTitle)
 
-        viewModel.start()
         viewModel.listToDisplay.waitForValueToSet()
 
         val values = viewModel.listToDisplay.value!!
@@ -118,46 +139,19 @@ class ViewModelTest {
     }
 
     @Test
-    fun `display last stats from the request`() {
-        val statsToDisplay = "StatsToDisplay"
-        `when`(application.getString(R.string.stats_to_display, countryStatsList[1].confirmed,
-            countryStatsList[1].deaths, countryStatsList[1].recovered)).thenReturn(statsToDisplay)
-        viewModel.start()
-        viewModel.countries.waitForValueToSet()
-
-        viewModel.onItemSelected(1)
-        viewModel.statToDisplay.waitForValueToSet()
-
-        assertEquals(statsToDisplay, viewModel.statToDisplay.value)
-    }
-
-    @Test
-    fun `right slug used`() {
-        viewModel.start()
-        viewModel.countries.waitForValueToSet()
-
-        viewModel.onItemSelected(2)
-        viewModel.statToDisplay.waitForValueToSet()
-
-        assertEquals(listOfCountries[1].slug, repo.lastCountrySlugUsed)
-    }
-
-    @Test
     fun `when location is obtained right country preselected`() {
-        viewModel.start()
         viewModel.countries.waitForValueToSet()
 
         viewModel.onLocationObtained("Ireland")
         viewModel.displayedPositionInList.waitForValueToSet()
 
-        assertEquals(3, viewModel.displayedPositionInList.value)
+        assertEquals(2, viewModel.displayedPositionInList.value)
     }
 
     @Test
     fun `loading hiding on error`() {
         repo.setCountries(emptyList())
 
-        viewModel.start()
         viewModel.countries.waitForValueToSet()
         viewModel.loading.waitForValueToSet()
 

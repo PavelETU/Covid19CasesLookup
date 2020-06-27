@@ -3,6 +3,7 @@ package com.wordpress.covid19caseslookup.presentation
 import android.app.Application
 import androidx.lifecycle.*
 import com.wordpress.covid19caseslookup.R
+import com.wordpress.covid19caseslookup.androidframework.SingleLiveEvent
 import com.wordpress.covid19caseslookup.data.LookupRepo
 import com.wordpress.covid19caseslookup.data.entities.Country
 import kotlinx.coroutines.launch
@@ -12,13 +13,14 @@ class LookupViewModel(private val lookupRepo: LookupRepo, private val appForCont
     val listToDisplay: LiveData<List<String>> = countries.map {
         it.map { country -> country.country }
     }
-    val statToDisplay = MutableLiveData<String>()
     val showError = MutableLiveData<Boolean>()
     val loading = MutableLiveData<Boolean>()
     val displayedPositionInList = MediatorLiveData<Int>()
     private var country = MutableLiveData<String>()
+    val snackBarEvent = SingleLiveEvent<String>()
+    val openStatsEventWithSlug = SingleLiveEvent<String>()
 
-    init{
+    init {
         displayedPositionInList.addSource(countries) {
             if (it.isNotEmpty()) displayedPositionInList.removeSource(countries)
             if (country.value != null) {
@@ -35,9 +37,14 @@ class LookupViewModel(private val lookupRepo: LookupRepo, private val appForCont
                 if (index != -1) displayedPositionInList.value = index
             }
         }
+        loadCountries()
     }
 
-    fun start() {
+    fun retry() {
+        loadCountries()
+    }
+
+    private fun loadCountries() {
         showError.value = false
         loading.value = true
         viewModelScope.launch {
@@ -49,10 +56,11 @@ class LookupViewModel(private val lookupRepo: LookupRepo, private val appForCont
     }
 
     fun onItemSelected(position: Int) {
-        viewModelScope.launch {
-            val stats = lookupRepo.getCountrySummary(countries.value!![position].slug).lastOrNull() ?: return@launch
-            statToDisplay.value = appForContext.getString(R.string.stats_to_display, stats.confirmed, stats.deaths, stats.recovered)
+        val countrySlug: String = countries.value!![position].slug.takeUnless { it.isEmpty() } ?: run {
+            snackBarEvent.setValue(appForContext.getString(R.string.no_stats))
+            return@onItemSelected
         }
+        openStatsEventWithSlug.setValue(countrySlug)
     }
 
     fun onLocationObtained(countryName: String?) {

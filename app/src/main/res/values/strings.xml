@@ -3,4 +3,5 @@
     <string name="choose_country">Choose a country</string>
     <string name="stats_to_display">Confirmed %d, Deaths %d, Recovered %d</string>
     <string name="something_went_wrong_tap_to_retry">Something went wrong.\nTap to retry</string>
+    <string name="no_stats">No Stats for country. Try again later</string>
 </resources>
