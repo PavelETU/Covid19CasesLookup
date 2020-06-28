@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.wordpress.covid19caseslookup.data.entities.Country
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
-import com.wordpress.covid19caseslookup.presentation.LookupViewModel
+import com.wordpress.covid19caseslookup.presentation.ListOfCountriesViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -29,7 +29,7 @@ class ViewModelTest {
     @Mock
     private lateinit var application: Application
 
-    private lateinit var viewModel: LookupViewModel
+    private lateinit var viewModel: ListOfCountriesViewModel
     private lateinit var repo: FakeRepo
     private val listOfCountries = listOf(
         Country(
@@ -73,7 +73,7 @@ class ViewModelTest {
         MockitoAnnotations.initMocks(this)
         Dispatchers.setMain(fakeMainThread)
         repo = FakeRepo(listOfCountries, countryStatsList)
-        viewModel = LookupViewModel(repo, application)
+        viewModel = ListOfCountriesViewModel(repo, application)
     }
 
     @After

@@ -4,4 +4,7 @@
     <string name="stats_to_display">Confirmed %d, Deaths %d, Recovered %d</string>
     <string name="something_went_wrong_tap_to_retry">Something went wrong.\nTap to retry</string>
     <string name="no_stats">No Stats for country. Try again later</string>
+    <string name="confirmed">Confirmed</string>
+    <string name="deaths">Deaths</string>
+    <string name="recovered">Recovered</string>
 </resources>

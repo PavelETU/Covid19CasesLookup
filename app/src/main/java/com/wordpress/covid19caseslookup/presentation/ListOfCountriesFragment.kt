@@ -28,7 +28,7 @@ private const val LOCATION_PERMISSION_REQUEST_CODE = 1
 @AndroidEntryPoint
 class ListOfCountriesFragment : Fragment() {
 
-    private val viewModel: LookupViewModel by viewModels()
+    private val viewModel: ListOfCountriesViewModel by viewModels()
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var listener: OnCountryChosenListener

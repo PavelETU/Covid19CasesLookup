@@ -10,7 +10,7 @@ import com.wordpress.covid19caseslookup.data.entities.Country
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 
-class LookupViewModel @ViewModelInject constructor(var lookupRepo: LookupRepo, @ApplicationContext private val context: Context) : ViewModel() {
+class ListOfCountriesViewModel @ViewModelInject constructor(var lookupRepo: LookupRepo, @ApplicationContext private val context: Context) : ViewModel() {
     val countries = MutableLiveData<List<Country>>()
     val listToDisplay: LiveData<List<String>> = countries.map {
         it.map { country -> country.country }
@@ -53,7 +53,7 @@ class LookupViewModel @ViewModelInject constructor(var lookupRepo: LookupRepo, @
             val countries = lookupRepo.getCountries()
             loading.value = false
             if (countries.isEmpty()) showError.value = countries.isEmpty()
-            else this@LookupViewModel.countries.value = countries
+            else this@ListOfCountriesViewModel.countries.value = countries
         }
     }
 
