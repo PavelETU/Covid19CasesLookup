@@ -3,7 +3,9 @@ package com.wordpress.covid19caseslookup.presentation
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.wordpress.covid19caseslookup.R
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), ListOfCountriesFragment.OnCountryChosenListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

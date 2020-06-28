@@ -1,14 +1,16 @@
 package com.wordpress.covid19caseslookup.presentation
 
-import android.app.Application
+import android.content.Context
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.androidframework.SingleLiveEvent
 import com.wordpress.covid19caseslookup.data.LookupRepo
 import com.wordpress.covid19caseslookup.data.entities.Country
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 
-class LookupViewModel(private val lookupRepo: LookupRepo, private val appForContext: Application) : AndroidViewModel(appForContext) {
+class LookupViewModel @ViewModelInject constructor(var lookupRepo: LookupRepo, @ApplicationContext private val context: Context) : ViewModel() {
     val countries = MutableLiveData<List<Country>>()
     val listToDisplay: LiveData<List<String>> = countries.map {
         it.map { country -> country.country }
@@ -57,7 +59,7 @@ class LookupViewModel(private val lookupRepo: LookupRepo, private val appForCont
 
     fun onItemSelected(position: Int) {
         val countrySlug: String = countries.value!![position].slug.takeUnless { it.isEmpty() } ?: run {
-            snackBarEvent.setValue(appForContext.getString(R.string.no_stats))
+            snackBarEvent.setValue(context.getString(R.string.no_stats))
             return@onItemSelected
         }
         openStatsEventWithSlug.setValue(countrySlug)
