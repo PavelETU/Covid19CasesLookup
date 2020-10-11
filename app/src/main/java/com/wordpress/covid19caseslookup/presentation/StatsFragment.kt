@@ -4,14 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.androidframework.visible
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_stats.*
 
 private const val SLUG = "slug"
 
@@ -37,18 +38,18 @@ class StatsFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.showError.observe(viewLifecycleOwner, Observer { showError ->
-            error_view.visible(showError)
+        viewModel.showError.observe(viewLifecycleOwner, { showError ->
+            requireView().findViewById<TextView>(R.id.error_view).visible(showError)
         })
-        viewModel.loading.observe(viewLifecycleOwner, Observer { loading ->
-            loading_indicator.visible(loading)
+        viewModel.loading.observe(viewLifecycleOwner, { loading ->
+            requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(loading)
         })
-        error_view.setOnClickListener { viewModel.retry() }
-        viewModel.countryStats.observe(viewLifecycleOwner, Observer { displayStats(it) })
+        requireView().findViewById<TextView>(R.id.error_view).setOnClickListener { viewModel.retry() }
+        viewModel.countryStats.observe(viewLifecycleOwner, { displayStats(it) })
     }
 
     private fun displayStats(stats: List<CountryStats>) {
-        stats_view.visible(true)
+        requireView().findViewById<LinearLayout>(R.id.stats_view).visible(true)
 
     }
 

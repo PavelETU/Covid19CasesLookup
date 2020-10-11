@@ -10,18 +10,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.androidframework.visible
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_list_of_countries.*
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
@@ -40,18 +41,18 @@ class ListOfCountriesFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.listToDisplay.observe(viewLifecycleOwner, Observer { displayCountries(it) })
-        viewModel.showError.observe(viewLifecycleOwner, Observer { showError ->
-            error_view.visible(showError)
+        viewModel.openStatsEventWithSlug.observe(viewLifecycleOwner, { listener.onCountryChosen(it) })
+        viewModel.listToDisplay.observe(viewLifecycleOwner, { displayCountries(it) })
+        viewModel.showError.observe(viewLifecycleOwner, { showError ->
+            requireView().findViewById<TextView>(R.id.error_view).visible(showError)
         })
-        viewModel.loading.observe(viewLifecycleOwner, Observer { loading ->
-            loading_indicator.visible(loading)
+        viewModel.loading.observe(viewLifecycleOwner, { loading ->
+            requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(loading)
         })
-        error_view.setOnClickListener { viewModel.retry() }
+        requireView().findViewById<TextView>(R.id.error_view).setOnClickListener { viewModel.retry() }
         checkPermissionAndTryToGetLocation()
-        viewModel.displayedPositionInList.observe(viewLifecycleOwner, Observer { highlightPosition(it) })
-        viewModel.snackBarEvent.observe(viewLifecycleOwner, Observer { Snackbar.make(requireView(), it, Snackbar.LENGTH_SHORT).show() })
-        viewModel.openStatsEventWithSlug.observe(viewLifecycleOwner, Observer { listener.onCountryChosen(it) })
+        viewModel.displayedPositionInList.observe(viewLifecycleOwner, { highlightPosition(it) })
+        viewModel.snackBarEvent.observe(viewLifecycleOwner, { Snackbar.make(requireView(), it, Snackbar.LENGTH_SHORT).show() })
     }
 
     override fun onCreateView(
@@ -68,8 +69,8 @@ class ListOfCountriesFragment : Fragment() {
     }
 
     private fun displayCountries(countries: List<String>) {
-        list_of_countries.visibility = View.VISIBLE
-        list_of_countries.adapter = CountriesAdapter(countries, object: CountriesAdapter.ClickListener {
+        requireView().findViewById<RecyclerView>(R.id.list_of_countries).visibility = View.VISIBLE
+        requireView().findViewById<RecyclerView>(R.id.list_of_countries).adapter = CountriesAdapter(countries, object: CountriesAdapter.ClickListener {
             override fun onItemClick(position: Int) {
                 viewModel.onItemSelected(position)
             }
@@ -110,8 +111,8 @@ class ListOfCountriesFragment : Fragment() {
     }
 
     private fun highlightPosition(position: Int) {
-        (list_of_countries.layoutManager as? LinearLayoutManager?)?.scrollToPosition(position)
-        (list_of_countries.adapter as CountriesAdapter).animateItem(position)
+        (requireView().findViewById<RecyclerView>(R.id.list_of_countries).layoutManager as? LinearLayoutManager?)?.scrollToPosition(position)
+        (requireView().findViewById<RecyclerView>(R.id.list_of_countries).adapter as CountriesAdapter).animateItem(position)
     }
 
     interface OnCountryChosenListener {
