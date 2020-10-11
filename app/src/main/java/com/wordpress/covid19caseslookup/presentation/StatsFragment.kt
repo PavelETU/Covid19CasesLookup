@@ -20,14 +20,19 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.ui.tooling.preview.Preview
 import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.androidframework.visible
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 private const val SLUG = "slug"
 
+@ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class StatsFragment : Fragment() {
     private lateinit var slug: String
@@ -50,18 +55,29 @@ class StatsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.showError.observe(viewLifecycleOwner, { showError ->
-            requireView().findViewById<TextView>(R.id.error_view).visible(showError)
-        })
-        viewModel.loading.observe(viewLifecycleOwner, { loading ->
-            requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(loading)
-        })
-        requireView().findViewById<TextView>(R.id.error_view)
-            .setOnClickListener { viewModel.retry() }
-        viewModel.countryStats.observe(viewLifecycleOwner, { displayStats(it) })
+        viewLifecycleOwner.lifecycleScope.run {
+            launch {
+                viewModel.showError.collect { showError ->
+                    requireView().findViewById<TextView>(R.id.error_view).visible(showError)
+                    if (showError) requireView().findViewById<LinearLayout>(R.id.stats_view).visible(false)
+                }
+            }
+            launch {
+                viewModel.loading.collect { loading ->
+                    requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(loading)
+                }
+            }
+            launch {
+                viewModel.countryStats.collect {
+                    displayStats(it)
+                }
+            }
+        }
+        requireView().findViewById<TextView>(R.id.error_view).setOnClickListener { viewModel.retry() }
     }
 
     private fun displayStats(stats: List<CountryStats>) {
+        if (stats.isEmpty()) return
         requireView().findViewById<LinearLayout>(R.id.stats_view).visible(true)
         requireView().findViewById<ComposeView>(R.id.chart_for_stats).setContent {
             MaterialTheme {
