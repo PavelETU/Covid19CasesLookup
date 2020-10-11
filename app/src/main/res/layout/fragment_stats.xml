@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal" />
 
-        <com.wordpress.covid19caseslookup.presentation.ChartView
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/chart_for_stats"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

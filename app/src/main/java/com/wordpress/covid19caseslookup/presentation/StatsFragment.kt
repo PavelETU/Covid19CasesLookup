@@ -7,8 +7,20 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.style.TextAlign
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.ui.tooling.preview.Preview
 import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.androidframework.visible
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
@@ -44,13 +56,18 @@ class StatsFragment : Fragment() {
         viewModel.loading.observe(viewLifecycleOwner, { loading ->
             requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(loading)
         })
-        requireView().findViewById<TextView>(R.id.error_view).setOnClickListener { viewModel.retry() }
+        requireView().findViewById<TextView>(R.id.error_view)
+            .setOnClickListener { viewModel.retry() }
         viewModel.countryStats.observe(viewLifecycleOwner, { displayStats(it) })
     }
 
     private fun displayStats(stats: List<CountryStats>) {
         requireView().findViewById<LinearLayout>(R.id.stats_view).visible(true)
-
+        requireView().findViewById<ComposeView>(R.id.chart_for_stats).setContent {
+            MaterialTheme {
+                ViewForStats(statsToDisplay = stats)
+            }
+        }
     }
 
     companion object {
@@ -61,5 +78,21 @@ class StatsFragment : Fragment() {
                     putString(SLUG, slug)
                 }
             }
+    }
+}
+
+@Composable
+fun ViewForStats(statsToDisplay: List<CountryStats>) {
+    Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxHeight().fillMaxWidth()) {
+        Text(text = "Hello World!\nCompose edition", textAlign = TextAlign.Center)
+        Text(text = "There are ${statsToDisplay.size} stats to display")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    MaterialTheme {
+        ViewForStats(statsToDisplay = emptyList())
     }
 }
