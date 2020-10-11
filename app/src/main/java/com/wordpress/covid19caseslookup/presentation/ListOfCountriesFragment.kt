@@ -39,8 +39,8 @@ class ListOfCountriesFragment : Fragment() {
         listener = context as? OnCountryChosenListener ?: throw ClassCastException("Activity should implement OnCountryChosenListener")
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         viewModel.openStatsEventWithSlug.observe(viewLifecycleOwner, { listener.onCountryChosen(it) })
         viewModel.listToDisplay.observe(viewLifecycleOwner, { displayCountries(it) })
         viewModel.showError.observe(viewLifecycleOwner, { showError ->
