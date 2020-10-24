@@ -1,6 +1,7 @@
 package com.wordpress.covid19caseslookup.presentation
 
 import android.content.Context
+import android.util.SparseArray
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,12 +16,13 @@ import kotlinx.coroutines.launch
 @ExperimentalCoroutinesApi
 class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupRepo,
                                                          @ApplicationContext private val context: Context) : ViewModel() {
-    private val _countryStats = MutableStateFlow<List<CountryStats>>(emptyList())
-    val countryStats: StateFlow<List<CountryStats>> = _countryStats
-    private val _showError = MutableStateFlow(false)
-    val showError: StateFlow<Boolean> = _showError
-    private val _loading = MutableStateFlow(true)
-    val loading: StateFlow<Boolean> = _loading
+    private val _stateOfStatsScreen = MutableStateFlow<StateOfStatsScreen>(Loading)
+    val stateOfStatsScreen: StateFlow<StateOfStatsScreen> = _stateOfStatsScreen
+    private val _statsToDisplay = MutableStateFlow<List<CountryStats>>(emptyList())
+    private val statsToDisplay: StateFlow<List<CountryStats>> = _statsToDisplay
+    private lateinit var confirmedCasesByMonth: SparseArray<List<CountryStats>>
+    private lateinit var amountOfDeathsByMonth: SparseArray<List<CountryStats>>
+    private lateinit var recoveredCasesByMonth: SparseArray<List<CountryStats>>
     private var slug: String? = null
     fun onSlugObtained(slug: String) {
         if (this.slug != slug) {
@@ -34,13 +36,23 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
     }
 
     private fun loadStats() {
-        _showError.value = false
-        _loading.value = true
+        _stateOfStatsScreen.value = Loading
         viewModelScope.launch {
-            val stats = lookupRepo.getCountrySummary(slug!!)
-            _loading.value = false
-            if (stats.isEmpty()) _showError.value = true
-            else this@CountryStatsViewModel._countryStats.value = stats
+            _stateOfStatsScreen.value = Loading
+            _stateOfStatsScreen.value = runCatching {
+                lookupRepo.getCountrySummary(slug!!)
+            }.getOrNull()?.let {
+                parseStatsIntoMonthsAndDisplayLastStats(it)
+            } ?: Error
+        }
+    }
+
+    private fun parseStatsIntoMonthsAndDisplayLastStats(statsToParse: List<CountryStats>): StateOfStatsScreen {
+        return if (statsToParse.isEmpty()) {
+            NoData
+        } else {
+            _statsToDisplay.value = statsToParse
+            Success(listOf("Jan", "Feb"), statsToDisplay)
         }
     }
 }

@@ -27,6 +27,7 @@ import com.wordpress.covid19caseslookup.androidframework.visible
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -57,31 +58,35 @@ class StatsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewLifecycleOwner.lifecycleScope.run {
             launch {
-                viewModel.showError.collect { showError ->
-                    requireView().findViewById<TextView>(R.id.error_view).visible(showError)
-                    if (showError) requireView().findViewById<LinearLayout>(R.id.stats_view).visible(false)
-                }
-            }
-            launch {
-                viewModel.loading.collect { loading ->
-                    requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(loading)
-                }
-            }
-            launch {
-                viewModel.countryStats.collect {
-                    displayStats(it)
+                viewModel.stateOfStatsScreen.collect { status ->
+                    when(status) {
+                        is Loading -> {
+                            requireView().findViewById<TextView>(R.id.error_view).visible(false)
+                            requireView().findViewById<LinearLayout>(R.id.stats_view).visible(false)
+                            requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(true)
+                        }
+                        is Error, NoData -> {
+                            requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(false)
+                            requireView().findViewById<LinearLayout>(R.id.stats_view).visible(false)
+                            requireView().findViewById<TextView>(R.id.error_view).visible(true)
+                        }
+                        is Success -> {
+                            requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(false)
+                            requireView().findViewById<TextView>(R.id.error_view).visible(false)
+                            requireView().findViewById<LinearLayout>(R.id.stats_view).visible(true)
+                            displayStats(status.monthsToDisplay, status.statsToDisplay)
+                        }
+                    }
                 }
             }
         }
         requireView().findViewById<TextView>(R.id.error_view).setOnClickListener { viewModel.retry() }
     }
 
-    private fun displayStats(stats: List<CountryStats>) {
-        if (stats.isEmpty()) return
-        requireView().findViewById<LinearLayout>(R.id.stats_view).visible(true)
+    private fun displayStats(monthsToDisplay: List<String>, stats: StateFlow<List<CountryStats>>) {
         requireView().findViewById<ComposeView>(R.id.chart_for_stats).setContent {
             MaterialTheme {
-                ViewForStats(statsToDisplay = stats)
+                ViewForStats(statsToDisplay = stats.value)
             }
         }
     }

@@ -17,10 +17,6 @@ class LookUpRepoImpl @Inject constructor(private val lookupService: LookupServic
 
     override suspend fun getCountrySummary(countrySlug: String): List<CountryStats> =
         withContext(Dispatchers.IO) {
-            return@withContext try {
-                lookupService.getStatForCountry(countrySlug)
-            } catch (e: Exception) {
-                emptyList<CountryStats>()
-            }
+            return@withContext lookupService.getStatForCountry(countrySlug)
         }
 }
