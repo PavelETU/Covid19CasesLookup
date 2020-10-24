@@ -22,7 +22,7 @@ import org.mockito.MockitoAnnotations
 import java.util.concurrent.Executors
 
 @ExperimentalCoroutinesApi
-class ViewModelTest {
+class ListOfCountriesViewModelTest {
     @get:Rule
     var rule = InstantTaskExecutorRule()
     private val fakeMainThread = Executors.newSingleThreadExecutor().asCoroutineDispatcher()

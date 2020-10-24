@@ -2,6 +2,7 @@ package com.wordpress.covid19caseslookup.presentation
 
 import android.content.Context
 import android.util.SparseArray
+import androidx.annotation.VisibleForTesting
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,7 +21,8 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
     private val _stateOfStatsScreen = MutableStateFlow<StateOfStatsScreen>(Loading)
     val stateOfStatsScreen: StateFlow<StateOfStatsScreen> = _stateOfStatsScreen
     private val _statsToDisplay = MutableStateFlow<List<CountryStats>>(emptyList())
-    private val statsToDisplay: StateFlow<List<CountryStats>> = _statsToDisplay
+    @VisibleForTesting
+    val statsToDisplay: StateFlow<List<CountryStats>> = _statsToDisplay
     private lateinit var confirmedCasesByMonth: SparseArray<List<CountryStats>>
     private lateinit var amountOfDeathsByMonth: SparseArray<List<CountryStats>>
     private lateinit var recoveredCasesByMonth: SparseArray<List<CountryStats>>
@@ -53,7 +55,7 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
             Error(context.getString(R.string.no_stats))
         } else {
             _statsToDisplay.value = statsToParse
-            Success(listOf("Jan", "Feb"), statsToDisplay)
+            Success(emptyList(), statsToDisplay)
         }
     }
 }
