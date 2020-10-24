@@ -5,6 +5,7 @@ import android.util.SparseArray
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.data.LookupRepo
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -43,13 +44,13 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
                 lookupRepo.getCountrySummary(slug!!)
             }.getOrNull()?.let {
                 parseStatsIntoMonthsAndDisplayLastStats(it)
-            } ?: Error
+            } ?: Error(context.getString(R.string.something_went_wrong_tap_to_retry))
         }
     }
 
     private fun parseStatsIntoMonthsAndDisplayLastStats(statsToParse: List<CountryStats>): StateOfStatsScreen {
         return if (statsToParse.isEmpty()) {
-            NoData
+            Error(context.getString(R.string.no_stats))
         } else {
             _statsToDisplay.value = statsToParse
             Success(listOf("Jan", "Feb"), statsToDisplay)

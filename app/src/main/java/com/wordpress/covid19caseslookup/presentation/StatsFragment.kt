@@ -27,6 +27,7 @@ import com.wordpress.covid19caseslookup.androidframework.visible
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -65,10 +66,11 @@ class StatsFragment : Fragment() {
                             requireView().findViewById<LinearLayout>(R.id.stats_view).visible(false)
                             requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(true)
                         }
-                        is Error, NoData -> {
+                        is Error -> {
                             requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(false)
                             requireView().findViewById<LinearLayout>(R.id.stats_view).visible(false)
                             requireView().findViewById<TextView>(R.id.error_view).visible(true)
+                            requireView().findViewById<TextView>(R.id.error_view).text = status.message
                         }
                         is Success -> {
                             requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(false)
@@ -86,7 +88,7 @@ class StatsFragment : Fragment() {
     private fun displayStats(monthsToDisplay: List<String>, stats: StateFlow<List<CountryStats>>) {
         requireView().findViewById<ComposeView>(R.id.chart_for_stats).setContent {
             MaterialTheme {
-                ViewForStats(statsToDisplay = stats.value)
+                ViewForStats(monthsToDisplay, stats)
             }
         }
     }
@@ -102,18 +104,20 @@ class StatsFragment : Fragment() {
     }
 }
 
+@ExperimentalCoroutinesApi
 @Composable
-fun ViewForStats(statsToDisplay: List<CountryStats>) {
+fun ViewForStats(monthsToDisplay: List<String>, statsToDisplay: StateFlow<List<CountryStats>>) {
     Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxHeight().fillMaxWidth()) {
         Text(text = "Hello World!\nCompose edition", textAlign = TextAlign.Center)
-        Text(text = "There are ${statsToDisplay.size} stats to display")
+        Text(text = "There are ${statsToDisplay.value.size} stats to display")
     }
 }
 
+@ExperimentalCoroutinesApi
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     MaterialTheme {
-        ViewForStats(statsToDisplay = emptyList())
+        ViewForStats(listOf("Jan", "Feb", "Mar"), statsToDisplay = MutableStateFlow(emptyList()))
     }
 }

@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 sealed class StateOfStatsScreen
 object Loading: StateOfStatsScreen()
-object Error: StateOfStatsScreen()
-object NoData: StateOfStatsScreen()
+data class Error(val message: String): StateOfStatsScreen()
 @ExperimentalCoroutinesApi
 data class Success(val monthsToDisplay: List<String>, val statsToDisplay: StateFlow<List<CountryStats>>): StateOfStatsScreen()
