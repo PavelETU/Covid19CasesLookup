@@ -179,6 +179,30 @@ class StatsScreenViewModelTest {
 
         assertEquals(listOf(RecordWithCases(88, "22")), viewModel.statsToDisplay.value)
     }
+
+    @Test
+    fun `confirm right data after switching types of cases for the last month`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+        val listOfStats = listOf(
+            CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
+            CountryStats(1100, 9, 950, "2020-01-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-02-25T00:00:00Z"),
+            CountryStats(1400, 18, 1200, "2020-04-16T00:00:00Z"),
+            CountryStats(1500, 20, 1300, "2020-04-26T00:00:00Z")
+        )
+        repo.block = { listOfStats }
+
+        viewModel.onSlugObtained("Mexico")
+
+        viewModel.recoveredClick()
+        assertEquals(listOf(RecordWithCases(1200, "16"),
+            RecordWithCases(1300, "26")), viewModel.statsToDisplay.value)
+        viewModel.lethalClick()
+        assertEquals(listOf(RecordWithCases(18, "16"),
+            RecordWithCases(20, "26")), viewModel.statsToDisplay.value)
+        viewModel.confirmedClick()
+        assertEquals(listOf(RecordWithCases(1400, "16"),
+            RecordWithCases(1500, "26")), viewModel.statsToDisplay.value)
+    }
 }
 
 private class FakeRepository @ExperimentalCoroutinesApi constructor(): LookupRepo {
