@@ -4,10 +4,7 @@ import android.content.Context
 import com.wordpress.covid19caseslookup.data.LookupRepo
 import com.wordpress.covid19caseslookup.data.entities.Country
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
-import com.wordpress.covid19caseslookup.presentation.CountryStatsViewModel
-import com.wordpress.covid19caseslookup.presentation.Error
-import com.wordpress.covid19caseslookup.presentation.Loading
-import com.wordpress.covid19caseslookup.presentation.Success
+import com.wordpress.covid19caseslookup.presentation.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runBlockingTest
@@ -103,7 +100,6 @@ class StatsScreenViewModelTest {
         advanceTimeBy(1000)
 
         assertEquals(Success(listOf("Jan"), viewModel.statsToDisplay), viewModel.stateOfStatsScreen.value)
-        assertEquals(listOfStats, viewModel.statsToDisplay.value)
     }
 
     @Test
@@ -114,18 +110,11 @@ class StatsScreenViewModelTest {
             CountryStats(1000, 12, 956, "2020-02-25T00:00:00Z"),
             CountryStats(1500, 20, 1300, "2020-04-26T00:00:00Z")
         )
-        repo.block = {
-            withContext(coroutineTestRule.testCoroutineDispatcher) {
-                delay(1000)
-                listOfStats
-            }
-        }
+        repo.block = { listOfStats }
 
         viewModel.onSlugObtained("Mexico")
-        advanceTimeBy(1000)
 
         assertEquals(Success(listOf("Jan", "Feb", "Apr"), viewModel.statsToDisplay), viewModel.stateOfStatsScreen.value)
-        assertEquals(listOfStats, viewModel.statsToDisplay.value)
     }
 
     @Test
@@ -154,19 +143,41 @@ class StatsScreenViewModelTest {
             CountryStats(1000, 12, 956, "2021-04-25T00:00:00Z"),
             CountryStats(1500, 20, 1300, "2021-10-26T00:00:00Z")
         )
-        repo.block = {
-            withContext(coroutineTestRule.testCoroutineDispatcher) {
-                delay(1000)
-                listOfStats
-            }
-        }
+        repo.block = { listOfStats }
 
         viewModel.onSlugObtained("Mexico")
-        advanceTimeBy(1000)
 
         assertEquals(Success(listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
             "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Apr", "Oct"), viewModel.statsToDisplay), viewModel.stateOfStatsScreen.value)
-        assertEquals(listOfStats, viewModel.statsToDisplay.value)
+    }
+
+    @Test
+    fun `after parsing confirmed cases for last month are displayed`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+        val listOfStats = listOf(
+            CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
+            CountryStats(1100, 9, 950, "2020-01-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-02-25T00:00:00Z"),
+            CountryStats(1400, 18, 1200, "2020-04-16T00:00:00Z"),
+            CountryStats(1500, 20, 1300, "2020-04-26T00:00:00Z")
+        )
+        repo.block = { listOfStats }
+
+        viewModel.onSlugObtained("Mexico")
+
+        assertEquals(listOf(RecordWithCases(1400, "16"),
+            RecordWithCases(1500, "26")), viewModel.statsToDisplay.value)
+    }
+
+    @Test
+    fun `after parsing confirmed cases for last month are displayed even for sinle record`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+        val listOfStats = listOf(
+            CountryStats(88, 1, 70, "2020-01-22T00:00:00Z"),
+        )
+        repo.block = { listOfStats }
+
+        viewModel.onSlugObtained("Mexico")
+
+        assertEquals(listOf(RecordWithCases(88, "22")), viewModel.statsToDisplay.value)
     }
 }
 

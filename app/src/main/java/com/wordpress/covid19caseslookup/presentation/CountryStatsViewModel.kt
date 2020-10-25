@@ -1,8 +1,8 @@
 package com.wordpress.covid19caseslookup.presentation
 
 import android.content.Context
-import android.util.SparseArray
 import androidx.annotation.VisibleForTesting
+import androidx.collection.SparseArrayCompat
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,20 +14,20 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.util.*
 
 @ExperimentalCoroutinesApi
 class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupRepo,
                                                          @ApplicationContext private val context: Context) : ViewModel() {
     private val _stateOfStatsScreen = MutableStateFlow<StateOfStatsScreen>(Loading)
     val stateOfStatsScreen: StateFlow<StateOfStatsScreen> = _stateOfStatsScreen
-    private val _statsToDisplay = MutableStateFlow<List<CountryStats>>(emptyList())
+    private val _statsToDisplay = MutableStateFlow<List<RecordWithCases>>(emptyList())
     @VisibleForTesting
-    val statsToDisplay: StateFlow<List<CountryStats>> = _statsToDisplay
-    private lateinit var confirmedCasesByMonth: SparseArray<List<CountryStats>>
-    private lateinit var amountOfDeathsByMonth: SparseArray<List<CountryStats>>
-    private lateinit var recoveredCasesByMonth: SparseArray<List<CountryStats>>
+    val statsToDisplay: StateFlow<List<RecordWithCases>> = _statsToDisplay
+    private var confirmedCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
+    private var amountOfDeathsByMonth = SparseArrayCompat<List<RecordWithCases>>()
+    private var recoveredCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
     private var slug: String? = null
+
     fun onSlugObtained(slug: String) {
         if (this.slug != slug) {
             this.slug = slug
@@ -55,16 +55,29 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
         return if (statsToParse.isEmpty()) {
             Error(context.getString(R.string.no_stats))
         } else {
-            _statsToDisplay.value = statsToParse
             val months = ArrayList<String>()
             var lastMonth = 0
+            var indexOfPopulatedMonth = 0
+            val confirmed = ArrayList<RecordWithCases>()
             statsToParse.forEach {
                 val monthIndex = it.date.substring(5, 7).toInt()
                 if (monthIndex != lastMonth) {
+                    if (indexOfPopulatedMonth != 0 || lastMonth != 0) {
+                        confirmedCasesByMonth.put(indexOfPopulatedMonth, confirmed)
+                        confirmed.clear()
+                        indexOfPopulatedMonth++
+                    }
                     lastMonth = monthIndex
                     months.add(getMonthNameByIndex(monthIndex))
                 }
+                val day = it.date.substring(8, 10)
+                confirmed.add(RecordWithCases(it.confirmed, day))
             }
+            if (confirmed.isNotEmpty()) {
+                confirmedCasesByMonth.put(indexOfPopulatedMonth, confirmed)
+                indexOfPopulatedMonth++
+            }
+            _statsToDisplay.value = confirmedCasesByMonth.get(--indexOfPopulatedMonth)!!
             Success(months, statsToDisplay)
         }
     }
