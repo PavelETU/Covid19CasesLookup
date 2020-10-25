@@ -24,8 +24,9 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
     @VisibleForTesting
     val statsToDisplay: StateFlow<List<RecordWithCases>> = _statsToDisplay
     private var confirmedCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
-    private var amountOfDeathsByMonth = SparseArrayCompat<List<RecordWithCases>>()
+    private var lethalCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
     private var recoveredCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
+    private var displayedMonthIndex = 0
     private var slug: String? = null
 
     fun onSlugObtained(slug: String) {
@@ -40,15 +41,15 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
     }
 
     fun confirmedClick() {
-
-    }
-
-    fun recoveredClick() {
-
+        _statsToDisplay.value = confirmedCasesByMonth.get(displayedMonthIndex)!!
     }
 
     fun lethalClick() {
+        _statsToDisplay.value = lethalCasesByMonth.get(displayedMonthIndex)!!
+    }
 
+    fun recoveredClick() {
+        _statsToDisplay.value = recoveredCasesByMonth.get(displayedMonthIndex)!!
     }
 
     private fun loadStats() {
@@ -71,12 +72,18 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
             var lastMonth = 0
             var indexOfPopulatedMonth = 0
             val confirmed = ArrayList<RecordWithCases>()
+            val lethal = ArrayList<RecordWithCases>()
+            val recovered = ArrayList<RecordWithCases>()
             statsToParse.forEach {
                 val monthIndex = it.date.substring(5, 7).toInt()
                 if (monthIndex != lastMonth) {
                     if (indexOfPopulatedMonth != 0 || lastMonth != 0) {
                         confirmedCasesByMonth.put(indexOfPopulatedMonth, confirmed)
+                        lethalCasesByMonth.put(indexOfPopulatedMonth, lethal)
+                        recoveredCasesByMonth.put(indexOfPopulatedMonth, recovered)
                         confirmed.clear()
+                        lethal.clear()
+                        recovered.clear()
                         indexOfPopulatedMonth++
                     }
                     lastMonth = monthIndex
@@ -84,12 +91,17 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
                 }
                 val day = it.date.substring(8, 10)
                 confirmed.add(RecordWithCases(it.confirmed, day))
+                lethal.add(RecordWithCases(it.deaths, day))
+                recovered.add(RecordWithCases(it.recovered, day))
             }
             if (confirmed.isNotEmpty()) {
                 confirmedCasesByMonth.put(indexOfPopulatedMonth, confirmed)
+                lethalCasesByMonth.put(indexOfPopulatedMonth, lethal)
+                recoveredCasesByMonth.put(indexOfPopulatedMonth, recovered)
                 indexOfPopulatedMonth++
             }
-            _statsToDisplay.value = confirmedCasesByMonth.get(--indexOfPopulatedMonth)!!
+            displayedMonthIndex = --indexOfPopulatedMonth
+            _statsToDisplay.value = confirmedCasesByMonth.get(displayedMonthIndex)!!
             Success(months, statsToDisplay)
         }
     }
