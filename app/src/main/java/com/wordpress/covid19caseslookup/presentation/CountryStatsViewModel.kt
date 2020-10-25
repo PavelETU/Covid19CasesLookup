@@ -39,6 +39,18 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
         loadStats()
     }
 
+    fun confirmedClick() {
+
+    }
+
+    fun recoveredClick() {
+
+    }
+
+    fun lethalClick() {
+
+    }
+
     private fun loadStats() {
         _stateOfStatsScreen.value = Loading
         viewModelScope.launch {
