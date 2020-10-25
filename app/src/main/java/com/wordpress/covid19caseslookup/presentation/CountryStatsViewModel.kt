@@ -26,6 +26,7 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
     private var confirmedCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
     private var lethalCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
     private var recoveredCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
+    private var currentCases = SparseArrayCompat<List<RecordWithCases>>()
     private var displayedMonthIndex = 0
     private var slug: String? = null
 
@@ -41,15 +42,27 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
     }
 
     fun confirmedClick() {
-        _statsToDisplay.value = confirmedCasesByMonth.get(displayedMonthIndex)!!
+        currentCases = confirmedCasesByMonth
+        updateScreen()
     }
 
     fun lethalClick() {
-        _statsToDisplay.value = lethalCasesByMonth.get(displayedMonthIndex)!!
+        currentCases = lethalCasesByMonth
+        updateScreen()
     }
 
     fun recoveredClick() {
-        _statsToDisplay.value = recoveredCasesByMonth.get(displayedMonthIndex)!!
+        currentCases = recoveredCasesByMonth
+        updateScreen()
+    }
+
+    fun monthClick(index: Int) {
+        displayedMonthIndex = index
+        updateScreen()
+    }
+
+    private fun updateScreen() {
+        _statsToDisplay.value = currentCases.get(displayedMonthIndex)!!
     }
 
     private fun loadStats() {
@@ -78,9 +91,9 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
                 val monthIndex = it.date.substring(5, 7).toInt()
                 if (monthIndex != lastMonth) {
                     if (indexOfPopulatedMonth != 0 || lastMonth != 0) {
-                        confirmedCasesByMonth.put(indexOfPopulatedMonth, confirmed)
-                        lethalCasesByMonth.put(indexOfPopulatedMonth, lethal)
-                        recoveredCasesByMonth.put(indexOfPopulatedMonth, recovered)
+                        confirmedCasesByMonth.put(indexOfPopulatedMonth, confirmed.toMutableList())
+                        lethalCasesByMonth.put(indexOfPopulatedMonth, lethal.toMutableList())
+                        recoveredCasesByMonth.put(indexOfPopulatedMonth, recovered.toMutableList())
                         confirmed.clear()
                         lethal.clear()
                         recovered.clear()
@@ -95,13 +108,14 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
                 recovered.add(RecordWithCases(it.recovered, day))
             }
             if (confirmed.isNotEmpty()) {
-                confirmedCasesByMonth.put(indexOfPopulatedMonth, confirmed)
-                lethalCasesByMonth.put(indexOfPopulatedMonth, lethal)
-                recoveredCasesByMonth.put(indexOfPopulatedMonth, recovered)
+                confirmedCasesByMonth.put(indexOfPopulatedMonth, confirmed.toMutableList())
+                lethalCasesByMonth.put(indexOfPopulatedMonth, lethal.toMutableList())
+                recoveredCasesByMonth.put(indexOfPopulatedMonth, recovered.toMutableList())
                 indexOfPopulatedMonth++
             }
             displayedMonthIndex = --indexOfPopulatedMonth
-            _statsToDisplay.value = confirmedCasesByMonth.get(displayedMonthIndex)!!
+            currentCases = confirmedCasesByMonth
+            updateScreen()
             Success(months, statsToDisplay)
         }
     }
