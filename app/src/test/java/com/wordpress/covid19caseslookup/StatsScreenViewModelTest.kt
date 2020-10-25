@@ -89,20 +89,83 @@ class StatsScreenViewModelTest {
 
     @Test
     fun `successful state after result is returned`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
-        val errorString = "Error"
-        val listOfStats = listOf(CountryStats(1000, 5, 900, "15-10-20"))
+        val listOfStats = listOf(
+            CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
+        )
         repo.block = {
             withContext(coroutineTestRule.testCoroutineDispatcher) {
                 delay(1000)
                 listOfStats
             }
         }
-        `when`(context.getString(R.string.something_went_wrong_tap_to_retry)).thenReturn(errorString)
 
         viewModel.onSlugObtained("Mexico")
         advanceTimeBy(1000)
 
-        assertEquals(Success(emptyList(), viewModel.statsToDisplay), viewModel.stateOfStatsScreen.value)
+        assertEquals(Success(listOf("Jan"), viewModel.statsToDisplay), viewModel.stateOfStatsScreen.value)
+        assertEquals(listOfStats, viewModel.statsToDisplay.value)
+    }
+
+    @Test
+    fun `months parsed correctly`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+        val listOfStats = listOf(
+            CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
+            CountryStats(1100, 9, 950, "2020-01-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-02-25T00:00:00Z"),
+            CountryStats(1500, 20, 1300, "2020-04-26T00:00:00Z")
+        )
+        repo.block = {
+            withContext(coroutineTestRule.testCoroutineDispatcher) {
+                delay(1000)
+                listOfStats
+            }
+        }
+
+        viewModel.onSlugObtained("Mexico")
+        advanceTimeBy(1000)
+
+        assertEquals(Success(listOf("Jan", "Feb", "Apr"), viewModel.statsToDisplay), viewModel.stateOfStatsScreen.value)
+        assertEquals(listOfStats, viewModel.statsToDisplay.value)
+    }
+
+    @Test
+    fun `all months parsed correctly`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+        val listOfStats = listOf(
+            CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
+            CountryStats(1100, 9, 950, "2020-01-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-02-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-02-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-02-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-03-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-04-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-05-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-06-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-07-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-08-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-09-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-10-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-10-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-10-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-10-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-11-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2020-12-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2021-01-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2021-02-25T00:00:00Z"),
+            CountryStats(1000, 12, 956, "2021-04-25T00:00:00Z"),
+            CountryStats(1500, 20, 1300, "2021-10-26T00:00:00Z")
+        )
+        repo.block = {
+            withContext(coroutineTestRule.testCoroutineDispatcher) {
+                delay(1000)
+                listOfStats
+            }
+        }
+
+        viewModel.onSlugObtained("Mexico")
+        advanceTimeBy(1000)
+
+        assertEquals(Success(listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
+            "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Apr", "Oct"), viewModel.statsToDisplay), viewModel.stateOfStatsScreen.value)
         assertEquals(listOfStats, viewModel.statsToDisplay.value)
     }
 }

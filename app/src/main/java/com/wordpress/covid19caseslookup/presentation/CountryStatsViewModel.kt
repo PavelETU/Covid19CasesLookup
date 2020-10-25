@@ -14,6 +14,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.*
 
 @ExperimentalCoroutinesApi
 class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupRepo,
@@ -55,7 +56,32 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
             Error(context.getString(R.string.no_stats))
         } else {
             _statsToDisplay.value = statsToParse
-            Success(emptyList(), statsToDisplay)
+            val months = ArrayList<String>()
+            var lastMonth = 0
+            statsToParse.forEach {
+                val monthIndex = it.date.substring(5, 7).toInt()
+                if (monthIndex != lastMonth) {
+                    lastMonth = monthIndex
+                    months.add(getMonthNameByIndex(monthIndex))
+                }
+            }
+            Success(months, statsToDisplay)
         }
+    }
+
+    private fun getMonthNameByIndex(monthIndex: Int) = when(monthIndex) {
+        1 -> "Jan"
+        2 -> "Feb"
+        3 -> "Mar"
+        4 -> "Apr"
+        5 -> "May"
+        6 -> "Jun"
+        7 -> "Jul"
+        8 -> "Aug"
+        9 -> "Sep"
+        10 -> "Oct"
+        11 -> "Nov"
+        12 -> "Dec"
+        else -> ""
     }
 }
