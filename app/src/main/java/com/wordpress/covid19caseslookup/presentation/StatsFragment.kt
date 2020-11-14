@@ -7,16 +7,17 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -107,8 +108,8 @@ class StatsFragment : Fragment() {
 @Composable
 fun ViewForStats(monthsToDisplay: List<String>, statsToDisplay: StateFlow<List<RecordWithCases>>) {
     Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxHeight().fillMaxWidth()) {
-        Text(text = "Hello World!\nCompose edition", textAlign = TextAlign.Center)
-        Text(text = "There are ${statsToDisplay.value.size} stats to display")
+        BasicText(text = "Hello World!\nCompose edition", style = TextStyle(textAlign = TextAlign.Center))
+        BasicText(text = "There are ${statsToDisplay.value.size} stats to display")
     }
 }
 
