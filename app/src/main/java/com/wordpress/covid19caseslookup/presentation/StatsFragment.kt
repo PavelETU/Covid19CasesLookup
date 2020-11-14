@@ -7,18 +7,19 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.ScrollableColumn
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -107,9 +108,24 @@ class StatsFragment : Fragment() {
 @ExperimentalCoroutinesApi
 @Composable
 fun ViewForStats(monthsToDisplay: List<String>, statsToDisplay: StateFlow<List<RecordWithCases>>) {
-    Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxHeight().fillMaxWidth()) {
-        BasicText(text = "Hello World!\nCompose edition", style = TextStyle(textAlign = TextAlign.Center))
-        BasicText(text = "There are ${statsToDisplay.value.size} stats to display")
+    val (selectedMonth, onMonthSelected) = remember { mutableStateOf(monthsToDisplay.last()) }
+    ScrollableColumn(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start,
+        modifier = Modifier.fillMaxHeight()) {
+            monthsToDisplay.forEach { month ->
+                Row(
+                    modifier = Modifier.padding(2.dp).selectable(
+                        selected = (selectedMonth == month),
+                        onClick = { onMonthSelected(month)}
+                    ).width(100.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = (selectedMonth == month),
+                        onClick = { onMonthSelected(month) })
+                    Spacer(modifier = Modifier.width(2.dp))
+                    BasicText(text = month)
+                }
+            }
     }
 }
 
