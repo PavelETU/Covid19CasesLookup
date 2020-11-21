@@ -14,12 +14,12 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.viewModel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -28,8 +28,6 @@ import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.androidframework.visible
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -77,7 +75,7 @@ class StatsFragment : Fragment() {
                             requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(false)
                             requireView().findViewById<TextView>(R.id.error_view).visible(false)
                             requireView().findViewById<LinearLayout>(R.id.stats_view).visible(true)
-                            displayStats(status.monthsToDisplay, status.statsToDisplay)
+                            displayStats()
                         }
                     }
                 }
@@ -86,10 +84,10 @@ class StatsFragment : Fragment() {
         requireView().findViewById<TextView>(R.id.error_view).setOnClickListener { viewModel.retry() }
     }
 
-    private fun displayStats(monthsToDisplay: List<String>, stats: StateFlow<List<RecordWithCases>>) {
+    private fun displayStats() {
         requireView().findViewById<ComposeView>(R.id.chart_for_stats).setContent {
             MaterialTheme {
-                ViewForStats(monthsToDisplay, stats)
+                ViewForStats(viewModel)
             }
         }
     }
@@ -107,26 +105,27 @@ class StatsFragment : Fragment() {
 
 @ExperimentalCoroutinesApi
 @Composable
-fun ViewForStats(monthsToDisplay: List<String>, statsToDisplay: StateFlow<List<RecordWithCases>>) {
-    val (selectedMonth, onMonthSelected) = remember { mutableStateOf(monthsToDisplay.last()) }
+fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
     ScrollableColumn(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxHeight()) {
-            monthsToDisplay.forEach { month ->
+            viewModel.monthsToDisplay.forEach { month ->
+                val value = viewModel.displayedMonth.collectAsState()
                 Row(
                     modifier = Modifier.padding(2.dp).selectable(
-                        selected = (selectedMonth == month),
-                        onClick = { onMonthSelected(month)}
+                        selected = (value.value == month),
+                        onClick = { viewModel.monthClick(month) }
                     ).width(100.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
-                        selected = (selectedMonth == month),
-                        onClick = { onMonthSelected(month) })
+                        selected = (value.value == month),
+                        onClick = { viewModel.monthClick(month) })
                     Spacer(modifier = Modifier.width(2.dp))
                     BasicText(text = month)
                 }
             }
     }
+
 }
 
 @ExperimentalCoroutinesApi
@@ -134,6 +133,6 @@ fun ViewForStats(monthsToDisplay: List<String>, statsToDisplay: StateFlow<List<R
 @Composable
 fun DefaultPreview() {
     MaterialTheme {
-        ViewForStats(listOf("Jan", "Feb", "Mar"), statsToDisplay = MutableStateFlow(emptyList()))
+        ViewForStats()
     }
 }

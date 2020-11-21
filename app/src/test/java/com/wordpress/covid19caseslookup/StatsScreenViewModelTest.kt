@@ -99,7 +99,7 @@ class StatsScreenViewModelTest {
         viewModel.onSlugObtained("Mexico")
         advanceTimeBy(1000)
 
-        assertEquals(Success(listOf("Jan"), viewModel.statsToDisplay), viewModel.stateOfStatsScreen.value)
+        assertEquals(listOf("Jan"), viewModel.monthsToDisplay)
     }
 
     @Test
@@ -114,7 +114,7 @@ class StatsScreenViewModelTest {
 
         viewModel.onSlugObtained("Mexico")
 
-        assertEquals(Success(listOf("Jan", "Feb", "Apr"), viewModel.statsToDisplay), viewModel.stateOfStatsScreen.value)
+        assertEquals(listOf("Jan", "Feb", "Apr"), viewModel.monthsToDisplay)
     }
 
     @Test
@@ -147,8 +147,8 @@ class StatsScreenViewModelTest {
 
         viewModel.onSlugObtained("Mexico")
 
-        assertEquals(Success(listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
-            "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Apr", "Oct"), viewModel.statsToDisplay), viewModel.stateOfStatsScreen.value)
+        assertEquals(listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
+            "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Apr", "Oct"), viewModel.monthsToDisplay)
     }
 
     @Test
@@ -219,19 +219,19 @@ class StatsScreenViewModelTest {
 
         viewModel.onSlugObtained("Mexico")
 
-        viewModel.monthClick(0)
+        viewModel.monthClick("Jan")
         assertEquals(listOf(RecordWithCases(1000, "22")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(1)
+        viewModel.monthClick("Feb")
         assertEquals(listOf(RecordWithCases(1059, "25")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(2)
+        viewModel.monthClick("Mar")
         assertEquals(listOf(RecordWithCases(1300, "05")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(3)
+        viewModel.monthClick("Apr")
         assertEquals(listOf(RecordWithCases(1500, "10")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(4)
+        viewModel.monthClick("May")
         assertEquals(listOf(RecordWithCases(1600, "20")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(5)
+        viewModel.monthClick("Oct")
         assertEquals(listOf(RecordWithCases(1700, "18")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(6)
+        viewModel.monthClick("Nov")
         assertEquals(listOf(RecordWithCases(1800, "25")), viewModel.statsToDisplay.value)
     }
 
@@ -251,19 +251,19 @@ class StatsScreenViewModelTest {
         viewModel.onSlugObtained("Mexico")
 
         viewModel.lethalClick()
-        viewModel.monthClick(0)
+        viewModel.monthClick("Jan")
         assertEquals(listOf(RecordWithCases(5, "22")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(1)
+        viewModel.monthClick("Feb")
         assertEquals(listOf(RecordWithCases(10, "25")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(2)
+        viewModel.monthClick("Mar")
         assertEquals(listOf(RecordWithCases(15, "05")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(3)
+        viewModel.monthClick("Apr")
         assertEquals(listOf(RecordWithCases(20, "10")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(4)
+        viewModel.monthClick("May")
         assertEquals(listOf(RecordWithCases(25, "20")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(5)
+        viewModel.monthClick("Oct")
         assertEquals(listOf(RecordWithCases(30, "18")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(6)
+        viewModel.monthClick("Nov")
         assertEquals(listOf(RecordWithCases(35, "25")), viewModel.statsToDisplay.value)
     }
 
@@ -283,19 +283,19 @@ class StatsScreenViewModelTest {
         viewModel.onSlugObtained("Mexico")
 
         viewModel.recoveredClick()
-        viewModel.monthClick(0)
+        viewModel.monthClick("Jan")
         assertEquals(listOf(RecordWithCases(900, "22")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(1)
+        viewModel.monthClick("Feb")
         assertEquals(listOf(RecordWithCases(956, "25")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(2)
+        viewModel.monthClick("Mar")
         assertEquals(listOf(RecordWithCases(1000, "05")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(3)
+        viewModel.monthClick("Apr")
         assertEquals(listOf(RecordWithCases(1010, "10")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(4)
+        viewModel.monthClick("May")
         assertEquals(listOf(RecordWithCases(1020, "20")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(5)
+        viewModel.monthClick("Oct")
         assertEquals(listOf(RecordWithCases(1030, "18")), viewModel.statsToDisplay.value)
-        viewModel.monthClick(6)
+        viewModel.monthClick("Nov")
         assertEquals(listOf(RecordWithCases(1100, "25")), viewModel.statsToDisplay.value)
     }
 }

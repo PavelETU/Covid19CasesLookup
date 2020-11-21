@@ -1,7 +1,6 @@
 package com.wordpress.covid19caseslookup.presentation
 
 import android.content.Context
-import androidx.annotation.VisibleForTesting
 import androidx.collection.SparseArrayCompat
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
@@ -21,13 +20,14 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
     private val _stateOfStatsScreen = MutableStateFlow<StateOfStatsScreen>(Loading)
     val stateOfStatsScreen: StateFlow<StateOfStatsScreen> = _stateOfStatsScreen
     private val _statsToDisplay = MutableStateFlow<List<RecordWithCases>>(emptyList())
-    @VisibleForTesting
     val statsToDisplay: StateFlow<List<RecordWithCases>> = _statsToDisplay
     private var confirmedCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
     private var lethalCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
     private var recoveredCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
     private var currentCases = SparseArrayCompat<List<RecordWithCases>>()
-    private var displayedMonthIndex = 0
+    private val _displayedMonth = MutableStateFlow("")
+    val displayedMonth: StateFlow<String> = _displayedMonth
+    var monthsToDisplay: List<String> = emptyList()
     private var slug: String? = null
 
     fun onSlugObtained(slug: String) {
@@ -56,13 +56,13 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
         updateScreen()
     }
 
-    fun monthClick(index: Int) {
-        displayedMonthIndex = index
+    fun monthClick(month: String) {
+        _displayedMonth.value = month
         updateScreen()
     }
 
     private fun updateScreen() {
-        _statsToDisplay.value = currentCases.get(displayedMonthIndex)!!
+        _statsToDisplay.value = currentCases.get(monthsToDisplay.indexOf(displayedMonth.value))!!
     }
 
     private fun loadStats() {
@@ -113,10 +113,11 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
                 recoveredCasesByMonth.put(indexOfPopulatedMonth, recovered.toMutableList())
                 indexOfPopulatedMonth++
             }
-            displayedMonthIndex = --indexOfPopulatedMonth
             currentCases = confirmedCasesByMonth
+            _displayedMonth.value = months.last()
+            monthsToDisplay = months
             updateScreen()
-            Success(months, statsToDisplay)
+            Success
         }
     }
 

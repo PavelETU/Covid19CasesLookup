@@ -46,6 +46,12 @@ android {
         kotlinCompilerVersion '1.4.10'
         kotlinCompilerExtensionVersion '1.0.0-alpha04'
     }
+
+    packagingOptions {
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.0'
+        exclude 'META-INF/LGPL2.1'
+    }
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
