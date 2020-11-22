@@ -6,5 +6,6 @@ Uses:
 - BDD style UI tests
 - Unit tests
 - MVVM architecture
+- StateFlow
 
 <img src="screenshot_second_version.png" width="200">
