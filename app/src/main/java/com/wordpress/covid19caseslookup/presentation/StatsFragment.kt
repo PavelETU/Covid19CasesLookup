@@ -156,7 +156,7 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
                 val paint = android.graphics.Paint()
                 paint.textSize = 50F
                 val distanceToTheBase = (paint.descent() + paint.ascent())/2F
-                paint.textSize = 25F
+                paint.textSize = 40F
                 val distanceToTheBaseSmallText = (paint.descent() + paint.ascent())/2F
                 val middleOfTheBar = heightInPx / 2
                 stats.value.forEachIndexed { index, recordWithCases ->
@@ -179,7 +179,7 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
                     drawIntoCanvas {
                         paint.textSize = 50F
                         drawContext.canvas.nativeCanvas.drawText(recordWithCases.day, 0F, y + middleOfTheBar - distanceToTheBase, paint)
-                        paint.textSize = 25F
+                        paint.textSize = 40F
                         val cases = recordWithCases.cases.toString()
                         val widthOfText = paint.measureText(cases)
                         drawContext.canvas.nativeCanvas.drawText(cases, size.width - widthOfText, y + middleOfTheBar - distanceToTheBaseSmallText, paint)

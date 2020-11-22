@@ -102,7 +102,7 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
                     lastMonth = monthIndex
                     months.add(getMonthNameByIndex(monthIndex))
                 }
-                val day = countryStats.date.substring(8, 10)
+                val day = getOrdinalNumber(countryStats.date.substring(8, 10))
                 if (index != 0) {
                     confirmed.add(RecordWithCases(maxOf(countryStats.confirmed - statsToParse[index - 1].confirmed, 0), day))
                     lethal.add(RecordWithCases(maxOf(countryStats.deaths - statsToParse[index - 1].deaths, 0), day))
@@ -141,5 +141,14 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
         11 -> "Nov"
         12 -> "Dec"
         else -> ""
+    }
+
+    private fun getOrdinalNumber(number: String): String {
+        return when(val actualNumber = number.trimStart('0')) {
+            "1" -> "1st"
+            "2" -> "2nd"
+            "3" -> "3rd"
+            else -> actualNumber + "th"
+        }
     }
 }
