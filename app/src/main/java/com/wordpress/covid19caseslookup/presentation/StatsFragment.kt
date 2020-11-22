@@ -173,8 +173,9 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
                             Color.Red
                         }
                     }
-                    drawRect(LinearGradient(listOf(Color.Green, endColorForGradient), 0F, y + middleOfTheBar, rightOfTheBar, y + middleOfTheBar), Offset(0F, y + padding), Size(
-                        rightOfTheBar, heightOfOneBar))
+                    if (recordWithCases.cases != 0)
+                        drawRect(LinearGradient(listOf(Color.Green, endColorForGradient), 0F, y + middleOfTheBar, rightOfTheBar, y + middleOfTheBar),
+                            Offset(0F, y + padding), Size(rightOfTheBar, heightOfOneBar))
                     drawIntoCanvas {
                         paint.textSize = 50F
                         drawContext.canvas.nativeCanvas.drawText(recordWithCases.day, 0F, y + middleOfTheBar - distanceToTheBase, paint)

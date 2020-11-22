@@ -87,8 +87,8 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
             val confirmed = ArrayList<RecordWithCases>()
             val lethal = ArrayList<RecordWithCases>()
             val recovered = ArrayList<RecordWithCases>()
-            statsToParse.forEach {
-                val monthIndex = it.date.substring(5, 7).toInt()
+            statsToParse.forEachIndexed { index, countryStats ->
+                val monthIndex = countryStats.date.substring(5, 7).toInt()
                 if (monthIndex != lastMonth) {
                     if (indexOfPopulatedMonth != 0 || lastMonth != 0) {
                         confirmedCasesByMonth.put(indexOfPopulatedMonth, confirmed.toMutableList())
@@ -102,10 +102,16 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
                     lastMonth = monthIndex
                     months.add(getMonthNameByIndex(monthIndex))
                 }
-                val day = it.date.substring(8, 10)
-                confirmed.add(RecordWithCases(it.confirmed, day))
-                lethal.add(RecordWithCases(it.deaths, day))
-                recovered.add(RecordWithCases(it.recovered, day))
+                val day = countryStats.date.substring(8, 10)
+                if (index != 0) {
+                    confirmed.add(RecordWithCases(maxOf(countryStats.confirmed - statsToParse[index - 1].confirmed, 0), day))
+                    lethal.add(RecordWithCases(maxOf(countryStats.deaths - statsToParse[index - 1].deaths, 0), day))
+                    recovered.add(RecordWithCases(maxOf(countryStats.recovered - statsToParse[index - 1].recovered, 0), day))
+                } else {
+                    confirmed.add(RecordWithCases(countryStats.confirmed, day))
+                    lethal.add(RecordWithCases(countryStats.deaths, day))
+                    recovered.add(RecordWithCases(countryStats.recovered, day))
+                }
             }
             if (confirmed.isNotEmpty()) {
                 confirmedCasesByMonth.put(indexOfPopulatedMonth, confirmed.toMutableList())

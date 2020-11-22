@@ -164,8 +164,8 @@ class StatsScreenViewModelTest {
 
         viewModel.onSlugObtained("Mexico")
 
-        assertEquals(listOf(RecordWithCases(1400, "16"),
-            RecordWithCases(1500, "26")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(400, "16"),
+            RecordWithCases(100, "26")), viewModel.statsToDisplay.value)
     }
 
     @Test
@@ -194,26 +194,26 @@ class StatsScreenViewModelTest {
         viewModel.onSlugObtained("Mexico")
 
         viewModel.recoveredClick()
-        assertEquals(listOf(RecordWithCases(1200, "16"),
-            RecordWithCases(1300, "26")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(244, "16"),
+            RecordWithCases(100, "26")), viewModel.statsToDisplay.value)
         viewModel.lethalClick()
-        assertEquals(listOf(RecordWithCases(18, "16"),
-            RecordWithCases(20, "26")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(6, "16"),
+            RecordWithCases(2, "26")), viewModel.statsToDisplay.value)
         viewModel.confirmedClick()
-        assertEquals(listOf(RecordWithCases(1400, "16"),
-            RecordWithCases(1500, "26")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(400, "16"),
+            RecordWithCases(100, "26")), viewModel.statsToDisplay.value)
     }
 
     @Test
     fun `confirmed cases for different months updated properly`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
-            CountryStats(1059, 12, 956, "2020-02-25T00:00:00Z"),
+            CountryStats(1050, 12, 956, "2020-02-25T00:00:00Z"),
             CountryStats(1300, 12, 956, "2020-03-05T00:00:00Z"),
             CountryStats(1500, 12, 956, "2020-04-10T00:00:00Z"),
             CountryStats(1600, 12, 956, "2020-05-20T00:00:00Z"),
             CountryStats(1700, 12, 956, "2021-10-18T00:00:00Z"),
-            CountryStats(1800, 12, 956, "2021-11-25T00:00:00Z"),
+            CountryStats(1802, 12, 956, "2021-11-25T00:00:00Z"),
         )
         repo.block = { listOfStats }
 
@@ -222,17 +222,17 @@ class StatsScreenViewModelTest {
         viewModel.monthClick("Jan")
         assertEquals(listOf(RecordWithCases(1000, "22")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Feb")
-        assertEquals(listOf(RecordWithCases(1059, "25")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(50, "25")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Mar")
-        assertEquals(listOf(RecordWithCases(1300, "05")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(250, "05")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Apr")
-        assertEquals(listOf(RecordWithCases(1500, "10")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(200, "10")), viewModel.statsToDisplay.value)
         viewModel.monthClick("May")
-        assertEquals(listOf(RecordWithCases(1600, "20")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(100, "20")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Oct")
-        assertEquals(listOf(RecordWithCases(1700, "18")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(100, "18")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Nov")
-        assertEquals(listOf(RecordWithCases(1800, "25")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(102, "25")), viewModel.statsToDisplay.value)
     }
 
     @Test
@@ -240,11 +240,11 @@ class StatsScreenViewModelTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
             CountryStats(1059, 10, 956, "2020-02-25T00:00:00Z"),
-            CountryStats(1300, 15, 956, "2020-03-05T00:00:00Z"),
+            CountryStats(1300, 16, 956, "2020-03-05T00:00:00Z"),
             CountryStats(1500, 20, 956, "2020-04-10T00:00:00Z"),
             CountryStats(1600, 25, 956, "2020-05-20T00:00:00Z"),
             CountryStats(1700, 30, 956, "2021-10-18T00:00:00Z"),
-            CountryStats(1800, 35, 956, "2021-11-25T00:00:00Z"),
+            CountryStats(1800, 45, 956, "2021-11-25T00:00:00Z"),
         )
         repo.block = { listOfStats }
 
@@ -254,17 +254,17 @@ class StatsScreenViewModelTest {
         viewModel.monthClick("Jan")
         assertEquals(listOf(RecordWithCases(5, "22")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Feb")
-        assertEquals(listOf(RecordWithCases(10, "25")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(5, "25")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Mar")
-        assertEquals(listOf(RecordWithCases(15, "05")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(6, "05")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Apr")
-        assertEquals(listOf(RecordWithCases(20, "10")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(4, "10")), viewModel.statsToDisplay.value)
         viewModel.monthClick("May")
-        assertEquals(listOf(RecordWithCases(25, "20")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(5, "20")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Oct")
-        assertEquals(listOf(RecordWithCases(30, "18")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(5, "18")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Nov")
-        assertEquals(listOf(RecordWithCases(35, "25")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(15, "25")), viewModel.statsToDisplay.value)
     }
 
     @Test
@@ -286,17 +286,41 @@ class StatsScreenViewModelTest {
         viewModel.monthClick("Jan")
         assertEquals(listOf(RecordWithCases(900, "22")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Feb")
-        assertEquals(listOf(RecordWithCases(956, "25")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(56, "25")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Mar")
-        assertEquals(listOf(RecordWithCases(1000, "05")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(44, "05")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Apr")
-        assertEquals(listOf(RecordWithCases(1010, "10")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(10, "10")), viewModel.statsToDisplay.value)
         viewModel.monthClick("May")
-        assertEquals(listOf(RecordWithCases(1020, "20")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(10, "20")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Oct")
-        assertEquals(listOf(RecordWithCases(1030, "18")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(10, "18")), viewModel.statsToDisplay.value)
         viewModel.monthClick("Nov")
-        assertEquals(listOf(RecordWithCases(1100, "25")), viewModel.statsToDisplay.value)
+        assertEquals(listOf(RecordWithCases(70, "25")), viewModel.statsToDisplay.value)
+    }
+
+    @Test
+    fun `when data corrupted parse cases as 0`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+        val listOfStats = listOf(
+            CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
+            CountryStats(900, 2, 1, "2020-02-23T00:00:00Z")
+        )
+        repo.block = {
+            withContext(coroutineTestRule.testCoroutineDispatcher) {
+                delay(1000)
+                listOfStats
+            }
+        }
+
+        viewModel.onSlugObtained("Mexico")
+        advanceTimeBy(1000)
+
+        viewModel.monthClick("Feb")
+        assertEquals(listOf(RecordWithCases(0, "23")), viewModel.statsToDisplay.value)
+        viewModel.lethalClick()
+        assertEquals(listOf(RecordWithCases(0, "23")), viewModel.statsToDisplay.value)
+        viewModel.recoveredClick()
+        assertEquals(listOf(RecordWithCases(0, "23")), viewModel.statsToDisplay.value)
     }
 }
 
