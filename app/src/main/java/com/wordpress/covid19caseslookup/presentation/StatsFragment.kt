@@ -20,7 +20,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.LinearGradient
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
@@ -136,13 +140,46 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
             }
         }
         val stats = viewModel.statsToDisplay.collectAsState()
-        Canvas(Modifier.fillMaxWidth().fillMaxHeight().padding(20.dp)) {
-            val maxCases = stats.value.maxOf { it.cases }
-            val heightForOneCase = size.height / maxCases
-            val widthForOneDay = size.width / stats.value.size
-            stats.value.forEachIndexed { index, recordWithCases ->
-                val x = widthForOneDay * index
-                drawLine(Color.Cyan, Offset(x, size.height), Offset(x, size.height - recordWithCases.cases * heightForOneCase))
+        ScrollableColumn(Modifier.fillMaxHeight().fillMaxWidth().padding(10.dp)) {
+            val statsCount = stats.value.size
+            val oneBarHeight = 50
+            Canvas(Modifier.fillMaxWidth().height((statsCount*oneBarHeight).dp)) {
+                val heightInPx = oneBarHeight.dp.toPx()
+                val padding = 5.dp.toPx()
+                val heightOfOneBar = heightInPx - padding * 2
+                val maxCases = stats.value.maxOf { it.cases }
+                val widthForOneCase = size.width / maxCases
+                val paint = android.graphics.Paint()
+                paint.textSize = 50F
+                val distanceToTheBase = (paint.descent() + paint.ascent())/2F
+                paint.textSize = 25F
+                val distanceToTheBaseSmallText = (paint.descent() + paint.ascent())/2F
+                val middleOfTheBar = heightInPx / 2
+                stats.value.forEachIndexed { index, recordWithCases ->
+                    val y = heightInPx * index
+                    val rightOfTheBar = recordWithCases.cases * widthForOneCase
+                    val endColorForGradient = when {
+                        rightOfTheBar < size.width/2 -> {
+                            Color.Cyan
+                        }
+                        rightOfTheBar < size.width/1.5 -> {
+                            Color.Magenta
+                        }
+                        else -> {
+                            Color.Red
+                        }
+                    }
+                    drawRect(LinearGradient(listOf(Color.Green, endColorForGradient), 0F, y + middleOfTheBar, rightOfTheBar, y + middleOfTheBar), Offset(0F, y + padding), Size(
+                        rightOfTheBar, heightOfOneBar))
+                    drawIntoCanvas {
+                        paint.textSize = 50F
+                        drawContext.canvas.nativeCanvas.drawText(recordWithCases.day, 0F, y + middleOfTheBar - distanceToTheBase, paint)
+                        paint.textSize = 25F
+                        val cases = recordWithCases.cases.toString()
+                        val widthOfText = paint.measureText(cases)
+                        drawContext.canvas.nativeCanvas.drawText(cases, size.width - widthOfText, y + middleOfTheBar - distanceToTheBaseSmallText, paint)
+                    }
+                }
             }
         }
     }
