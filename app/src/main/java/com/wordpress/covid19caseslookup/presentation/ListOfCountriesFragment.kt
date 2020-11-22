@@ -10,19 +10,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.androidframework.visible
+import com.wordpress.covid19caseslookup.databinding.FragmentListOfCountriesBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1
@@ -30,6 +28,9 @@ private const val LOCATION_PERMISSION_REQUEST_CODE = 1
 @AndroidEntryPoint
 class ListOfCountriesFragment : Fragment() {
 
+    private var _binding: FragmentListOfCountriesBinding? = null
+    // Non nullable variable to be accessed during view active lifecycle
+    private val binding get() = _binding!!
     private val viewModel: ListOfCountriesViewModel by viewModels()
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -48,12 +49,12 @@ class ListOfCountriesFragment : Fragment() {
         viewModel.openStatsEventWithSlug.observe(viewLifecycleOwner, { listener.onCountryChosen(it) })
         viewModel.listToDisplay.observe(viewLifecycleOwner, { displayCountries(it) })
         viewModel.showError.observe(viewLifecycleOwner, { showError ->
-            requireView().findViewById<TextView>(R.id.error_view).visible(showError)
+            binding.errorView.visible(showError)
         })
         viewModel.loading.observe(viewLifecycleOwner, { loading ->
-            requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(loading)
+            binding.loadingIndicator.visible(loading)
         })
-        requireView().findViewById<TextView>(R.id.error_view).setOnClickListener { viewModel.retry() }
+        binding.errorView.setOnClickListener { viewModel.retry() }
         checkPermissionAndTryToGetLocation()
         viewModel.displayedPositionInList.observe(viewLifecycleOwner, { highlightPosition(it) })
         viewModel.snackBarEvent.observe(viewLifecycleOwner, { Snackbar.make(requireView(), it, Snackbar.LENGTH_SHORT).show() })
@@ -62,8 +63,14 @@ class ListOfCountriesFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_list_of_countries, container, false)
+    ): View {
+        _binding = FragmentListOfCountriesBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun checkPermissionAndTryToGetLocation() {
@@ -73,8 +80,8 @@ class ListOfCountriesFragment : Fragment() {
     }
 
     private fun displayCountries(countries: List<String>) {
-        requireView().findViewById<RecyclerView>(R.id.list_of_countries).visibility = View.VISIBLE
-        requireView().findViewById<RecyclerView>(R.id.list_of_countries).adapter = CountriesAdapter(countries, object: CountriesAdapter.ClickListener {
+        binding.listOfCountries.visibility = View.VISIBLE
+        binding.listOfCountries.adapter = CountriesAdapter(countries, object: CountriesAdapter.ClickListener {
             override fun onItemClick(position: Int) {
                 viewModel.onItemSelected(position)
             }
@@ -115,8 +122,8 @@ class ListOfCountriesFragment : Fragment() {
     }
 
     private fun highlightPosition(position: Int) {
-        (requireView().findViewById<RecyclerView>(R.id.list_of_countries).layoutManager as? LinearLayoutManager?)?.scrollToPosition(position)
-        (requireView().findViewById<RecyclerView>(R.id.list_of_countries).adapter as CountriesAdapter).animateItem(position)
+        (binding.listOfCountries.layoutManager as? LinearLayoutManager?)?.scrollToPosition(position)
+        (binding.listOfCountries.adapter as CountriesAdapter).animateItem(position)
     }
 
     interface OnCountryChosenListener {

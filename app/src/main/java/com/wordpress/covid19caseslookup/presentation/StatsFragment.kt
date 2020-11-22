@@ -4,10 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.RadioButton
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollableColumn
@@ -26,15 +22,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.LinearGradient
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.ui.tooling.preview.Preview
-import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.androidframework.visible
+import com.wordpress.covid19caseslookup.databinding.FragmentStatsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -45,6 +40,9 @@ private const val SLUG = "slug"
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class StatsFragment : Fragment() {
+    private var _binding: FragmentStatsBinding? = null
+    // Non nullable variable to be accessed during view active lifecycle
+    private val binding get() = _binding!!
     private lateinit var slug: String
     private val viewModel: CountryStatsViewModel by viewModels()
 
@@ -59,8 +57,9 @@ class StatsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_stats, container, false)
+    ): View {
+        _binding = FragmentStatsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,39 +67,44 @@ class StatsFragment : Fragment() {
         (requireActivity() as AppCompatActivity).supportActionBar?.title = slug.capitalize()
         (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
-        requireView().findViewById<RadioButton>(R.id.confirmed_cases).setOnClickListener { viewModel.confirmedClick() }
-        requireView().findViewById<RadioButton>(R.id.lethal_cases).setOnClickListener { viewModel.lethalClick() }
-        requireView().findViewById<RadioButton>(R.id.recovered_cases).setOnClickListener { viewModel.recoveredClick() }
+        binding.confirmedCases.setOnClickListener { viewModel.confirmedClick() }
+        binding.lethalCases.setOnClickListener { viewModel.lethalClick() }
+        binding.recoveredCases.setOnClickListener { viewModel.recoveredClick() }
         viewLifecycleOwner.lifecycleScope.run {
             launch {
                 viewModel.stateOfStatsScreen.collect { status ->
                     when(status) {
                         is Loading -> {
-                            requireView().findViewById<TextView>(R.id.error_view).visible(false)
-                            requireView().findViewById<LinearLayout>(R.id.stats_view).visible(false)
-                            requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(true)
+                            binding.errorView.visible(false)
+                            binding.statsView.visible(false)
+                            binding.loadingIndicator.visible(true)
                         }
                         is Error -> {
-                            requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(false)
-                            requireView().findViewById<LinearLayout>(R.id.stats_view).visible(false)
-                            requireView().findViewById<TextView>(R.id.error_view).visible(true)
-                            requireView().findViewById<TextView>(R.id.error_view).text = status.message
+                            binding.loadingIndicator.visible(false)
+                            binding.statsView.visible(false)
+                            binding.errorView.visible(true)
+                            binding.errorView.text = status.message
                         }
                         is Success -> {
-                            requireView().findViewById<ProgressBar>(R.id.loading_indicator).visible(false)
-                            requireView().findViewById<TextView>(R.id.error_view).visible(false)
-                            requireView().findViewById<LinearLayout>(R.id.stats_view).visible(true)
+                            binding.loadingIndicator.visible(false)
+                            binding.errorView.visible(false)
+                            binding.statsView.visible(true)
                             displayStats()
                         }
                     }
                 }
             }
         }
-        requireView().findViewById<TextView>(R.id.error_view).setOnClickListener { viewModel.retry() }
+        binding.errorView.setOnClickListener { viewModel.retry() }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun displayStats() {
-        requireView().findViewById<ComposeView>(R.id.chart_for_stats).setContent {
+        binding.chartForStats.setContent {
             MaterialTheme {
                 ViewForStats(viewModel)
             }

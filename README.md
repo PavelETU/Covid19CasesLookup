@@ -8,5 +8,6 @@ Uses:
 - MVVM architecture
 - StateFlow
 - Hilt for dependency injection
+- View Binding
 
 <img src="screenshot_second_version.png" width="200">
