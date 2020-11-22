@@ -7,5 +7,6 @@ Uses:
 - Unit tests
 - MVVM architecture
 - StateFlow
+- Hilt for dependency injection
 
 <img src="screenshot_second_version.png" width="200">
