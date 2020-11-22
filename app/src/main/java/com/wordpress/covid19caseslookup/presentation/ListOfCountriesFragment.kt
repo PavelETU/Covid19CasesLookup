@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -41,6 +42,9 @@ class ListOfCountriesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = getString(R.string.choose_country)
+        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(false)
         viewModel.openStatsEventWithSlug.observe(viewLifecycleOwner, { listener.onCountryChosen(it) })
         viewModel.listToDisplay.observe(viewLifecycleOwner, { displayCountries(it) })
         viewModel.showError.observe(viewLifecycleOwner, { showError ->

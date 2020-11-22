@@ -8,6 +8,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RadioButton
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.layout.*
@@ -64,6 +65,9 @@ class StatsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = slug.capitalize()
+        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
         requireView().findViewById<RadioButton>(R.id.confirmed_cases).setOnClickListener { viewModel.confirmedClick() }
         requireView().findViewById<RadioButton>(R.id.lethal_cases).setOnClickListener { viewModel.lethalClick() }
         requireView().findViewById<RadioButton>(R.id.recovered_cases).setOnClickListener { viewModel.recoveredClick() }
