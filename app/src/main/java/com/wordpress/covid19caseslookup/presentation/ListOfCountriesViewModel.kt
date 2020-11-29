@@ -4,39 +4,30 @@ import android.content.Context
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import com.wordpress.covid19caseslookup.R
-import com.wordpress.covid19caseslookup.androidframework.SingleLiveEvent
 import com.wordpress.covid19caseslookup.data.LookupRepo
 import com.wordpress.covid19caseslookup.data.entities.Country
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+const val INVALID_COUNTRY_POSITION = -1
 class ListOfCountriesViewModel @ViewModelInject constructor(var lookupRepo: LookupRepo, @ApplicationContext private val context: Context) : ViewModel() {
-    val countries = MutableLiveData<List<Country>>()
-    val listToDisplay: LiveData<List<String>> = countries.map {
-        it.map { country -> country.country }
-    }
-    val showError = MutableLiveData<Boolean>()
-    val loading = MutableLiveData<Boolean>()
-    val displayedPositionInList = MediatorLiveData<Int>()
-    private var country = MutableLiveData<String>()
-    val snackBarEvent = SingleLiveEvent<String>()
-    val openStatsEventWithSlug = SingleLiveEvent<String>()
+    private val _stateOfCountriesList: MutableStateFlow<StateOfListOfCountriesScreen> = MutableStateFlow(CountriesLoading)
+    val stateOfCountriesList: StateFlow<StateOfListOfCountriesScreen> = _stateOfCountriesList
+    private var countriesList: List<Country>? = null
+    var displayedPositionInList: Flow<Int>
+    private var usersCountry = MutableStateFlow("")
+    private val _snackBarEvent = MutableSharedFlow<String>()
+    val snackBarEvent: Flow<String> = _snackBarEvent
+    private val _openStatsEventWithSlug = MutableSharedFlow<String>(0)
+    val openStatsEventWithSlug: Flow<String> = _openStatsEventWithSlug
 
     init {
-        displayedPositionInList.addSource(countries) {
-            if (it.isNotEmpty()) displayedPositionInList.removeSource(countries)
-            if (country.value != null) {
-                if (!it.isNullOrEmpty()) {
-                    val index = it.indexOfFirst { elementToCheck -> elementToCheck.country.contentEquals(country.value!!) }
-                    if (index != -1) displayedPositionInList.value = index
-                }
-            }
-        }
-        displayedPositionInList.addSource(country) {
-            displayedPositionInList.removeSource(country)
-            if (!countries.value.isNullOrEmpty()) {
-                val index = countries.value!!.indexOfFirst { elementToCheck -> elementToCheck.country.contentEquals(country.value!!) }
-                if (index != -1) displayedPositionInList.value = index
+        displayedPositionInList = usersCountry.combine(stateOfCountriesList) { country, state ->
+            if (country.isNotEmpty() && (state is CountriesLoaded)) {
+                state.countries.indexOf(country)
+            } else {
+                INVALID_COUNTRY_POSITION
             }
         }
         loadCountries()
@@ -47,27 +38,29 @@ class ListOfCountriesViewModel @ViewModelInject constructor(var lookupRepo: Look
     }
 
     private fun loadCountries() {
-        showError.value = false
-        loading.value = true
+        _stateOfCountriesList.value = CountriesLoading
         viewModelScope.launch {
-            val countries = lookupRepo.getCountries()
-            loading.value = false
-            if (countries.isEmpty()) showError.value = countries.isEmpty()
-            else this@ListOfCountriesViewModel.countries.value = countries
+            countriesList = lookupRepo.getCountries()
+            _stateOfCountriesList.value =
+                if (countriesList.isNullOrEmpty()) CountriesFailedToLoad else CountriesLoaded(countriesList!!.map { it.country })
         }
     }
 
     fun onItemSelected(position: Int) {
-        val countrySlug: String = countries.value!![position].slug.takeUnless { it.isEmpty() } ?: run {
-            snackBarEvent.setValue(context.getString(R.string.no_stats))
+        val countrySlug: String = countriesList!![position].slug.takeUnless { it.isEmpty() } ?: run {
+            viewModelScope.launch {
+                _snackBarEvent.emit(context.getString(R.string.no_stats))
+            }
             return@onItemSelected
         }
-        openStatsEventWithSlug.setValue(countrySlug)
+        viewModelScope.launch {
+            _openStatsEventWithSlug.emit(countrySlug)
+        }
     }
 
     fun onLocationObtained(countryName: String?) {
         countryName ?: return
-        country.value = countryName
+        usersCountry.value = countryName
     }
 
 

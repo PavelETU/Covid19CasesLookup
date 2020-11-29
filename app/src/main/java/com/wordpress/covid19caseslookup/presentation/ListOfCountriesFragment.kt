@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -22,6 +23,8 @@ import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.androidframework.visible
 import com.wordpress.covid19caseslookup.databinding.FragmentListOfCountriesBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
@@ -39,23 +42,41 @@ class ListOfCountriesFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         listener = context as? OnCountryChosenListener ?: throw ClassCastException("Activity should implement OnCountryChosenListener")
+        lifecycleScope.launchWhenStarted {
+            viewModel.openStatsEventWithSlug.collect { listener.onCountryChosen(it) }
+        }
+        lifecycleScope.launchWhenStarted {
+            viewModel.snackBarEvent.collect { Snackbar.make(requireView(), it, Snackbar.LENGTH_SHORT).show() }
+        }
+        lifecycleScope.launchWhenResumed {
+            viewModel.displayedPositionInList.collect { highlightPosition(it) }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adjustToolbar()
-        viewModel.openStatsEventWithSlug.observe(viewLifecycleOwner, { listener.onCountryChosen(it) })
-        viewModel.listToDisplay.observe(viewLifecycleOwner, { displayCountries(it) })
-        viewModel.showError.observe(viewLifecycleOwner, { showError ->
-            binding.errorView.visible(showError)
-        })
-        viewModel.loading.observe(viewLifecycleOwner, { loading ->
-            binding.loadingIndicator.visible(loading)
-        })
         binding.errorView.setOnClickListener { viewModel.retry() }
         checkPermissionAndTryToGetLocation()
-        viewModel.displayedPositionInList.observe(viewLifecycleOwner, { highlightPosition(it) })
-        viewModel.snackBarEvent.observe(viewLifecycleOwner, { Snackbar.make(requireView(), it, Snackbar.LENGTH_SHORT).show() })
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.stateOfCountriesList.collect { status ->
+                when(status) {
+                    is CountriesLoading -> {
+                        binding.errorView.visible(false)
+                        binding.loadingIndicator.visible(true)
+                    }
+                    is CountriesFailedToLoad -> {
+                        binding.loadingIndicator.visible(false)
+                        binding.errorView.visible(true)
+                    }
+                    is CountriesLoaded -> {
+                        binding.loadingIndicator.visible(false)
+                        binding.errorView.visible(false)
+                        displayCountries(status.countries)
+                    }
+                }
+            }
+        }
     }
 
     private fun adjustToolbar() {
@@ -126,6 +147,7 @@ class ListOfCountriesFragment : Fragment() {
     }
 
     private fun highlightPosition(position: Int) {
+        if (position == INVALID_COUNTRY_POSITION) return
         (binding.listOfCountries.layoutManager as? LinearLayoutManager?)?.scrollToPosition(position)
         (binding.listOfCountries.adapter as CountriesAdapter).animateItem(position)
     }

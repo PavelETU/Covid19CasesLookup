@@ -7,6 +7,7 @@ Uses:
 - Unit tests
 - MVVM architecture
 - StateFlow
+- SharedFlow
 - Hilt for dependency injection
 - View Binding
 
