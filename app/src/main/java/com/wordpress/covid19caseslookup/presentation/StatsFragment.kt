@@ -33,7 +33,6 @@ import com.wordpress.covid19caseslookup.databinding.FragmentStatsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 private const val SLUG = "slug"
 
@@ -64,14 +63,12 @@ class StatsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireActivity() as AppCompatActivity).supportActionBar?.title = slug.capitalize()
-        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
+        adjustToolbar()
         binding.confirmedCases.setOnClickListener { viewModel.confirmedClick() }
         binding.lethalCases.setOnClickListener { viewModel.lethalClick() }
         binding.recoveredCases.setOnClickListener { viewModel.recoveredClick() }
         viewLifecycleOwner.lifecycleScope.run {
-            launch {
+            launchWhenStarted {
                 viewModel.stateOfStatsScreen.collect { status ->
                     when(status) {
                         is Loading -> {
@@ -96,6 +93,12 @@ class StatsFragment : Fragment() {
             }
         }
         binding.errorView.setOnClickListener { viewModel.retry() }
+    }
+
+    private fun adjustToolbar() {
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = slug.capitalize()
+        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
     }
 
     override fun onDestroyView() {
