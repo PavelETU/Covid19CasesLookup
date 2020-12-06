@@ -151,7 +151,7 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
             }
         }
         val stats = viewModel.statsToDisplay.collectAsState()
-        ScrollableColumn(Modifier.fillMaxHeight().fillMaxWidth().padding(10.dp)) {
+        ScrollableColumn(Modifier.fillMaxHeight().fillMaxWidth().padding(10.dp), verticalArrangement = Arrangement.Center) {
             val statsCount = stats.value.size
             val oneBarHeight = 50
             Canvas(Modifier.fillMaxWidth().height((statsCount*oneBarHeight).dp)) {
