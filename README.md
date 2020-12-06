@@ -11,4 +11,6 @@ Uses:
 - Hilt for dependency injection
 - View Binding
 
+For the last stable version checkout master branch
+
 <img src="screenshot_second_version.png" width="200">
