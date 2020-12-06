@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".presentation.StatsFragment">
+
+    <LinearLayout
+        android:id="@+id/stats_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <RadioGroup
+            android:id="@+id/type_of_cases_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checkedButton="@id/confirmed_cases"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/confirmed_cases"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/confirmed" />
+
+            <RadioButton
+                android:id="@+id/lethal_cases"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/deaths" />
+
+            <RadioButton
+                android:id="@+id/recovered_cases"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/recovered" />
+        </RadioGroup>
+
+        <RadioGroup
+            android:id="@+id/months_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/chart_for_stats"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/loading_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="visible"
+        tools:visibility="gone" />
+
+    <TextView
+        android:id="@+id/error_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/something_went_wrong_tap_to_retry"
+        android:visibility="gone"
+        tools:visibility="gone" />
+</FrameLayout>
