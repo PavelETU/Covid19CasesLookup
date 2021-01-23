@@ -133,18 +133,18 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
             verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start,
             modifier = Modifier.fillMaxHeight()
         ) {
-            viewModel.monthsToDisplay.forEach { month ->
-                val value = viewModel.displayedMonth.collectAsState()
+            viewModel.monthsToDisplay.forEachIndexed { index, month ->
+                val indexOfSelectedMonth = viewModel.displayedMonth.collectAsState()
                 Row(
                     modifier = Modifier.padding(2.dp).selectable(
-                        selected = (value.value == month),
-                        onClick = { viewModel.monthClick(month) }
+                        selected = (indexOfSelectedMonth.value == index),
+                        onClick = { viewModel.monthClick(index) }
                     ).width(60.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
-                        selected = (value.value == month),
-                        onClick = { viewModel.monthClick(month) })
+                        selected = (indexOfSelectedMonth.value == index),
+                        onClick = { viewModel.monthClick(index) })
                     Spacer(modifier = Modifier.width(2.dp))
                     BasicText(text = month)
                 }
