@@ -18,8 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.LinearGradient
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
@@ -181,7 +181,8 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
                         }
                     }
                     if (recordWithCases.cases != 0)
-                        drawRect(LinearGradient(listOf(Color.Green, endColorForGradient), 0F, y + middleOfTheBar, rightOfTheBar, y + middleOfTheBar),
+                        drawRect(Brush.linearGradient(listOf(Color.Green, endColorForGradient),
+                            Offset(0F, y + middleOfTheBar), Offset(rightOfTheBar, y + middleOfTheBar)),
                             Offset(0F, y + padding), Size(rightOfTheBar, heightOfOneBar))
                     drawIntoCanvas {
                         paint.textSize = 50F
