@@ -1,6 +1,6 @@
 package com.wordpress.covid19caseslookup
 
-import android.app.Application
+import android.content.Context
 import com.wordpress.covid19caseslookup.data.entities.Country
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
 import com.wordpress.covid19caseslookup.presentation.CountriesFailedToLoad
@@ -20,7 +20,7 @@ class ListOfCountriesViewModelTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
     @Mock
-    private lateinit var application: Application
+    private lateinit var application: Context
 
     private lateinit var viewModel: ListOfCountriesViewModel
     private lateinit var repo: FakeRepo
