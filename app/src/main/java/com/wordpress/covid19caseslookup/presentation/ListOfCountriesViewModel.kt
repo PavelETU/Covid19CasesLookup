@@ -19,8 +19,8 @@ class ListOfCountriesViewModel @ViewModelInject constructor(var lookupRepo: Look
     private var usersCountry = MutableStateFlow("")
     private val _snackBarEvent = MutableSharedFlow<String>()
     val snackBarEvent: Flow<String> = _snackBarEvent
-    private val _openStatsEventWithSlug = MutableSharedFlow<String>(0)
-    val openStatsEventWithSlug: Flow<String> = _openStatsEventWithSlug
+    private val _openStatsEventWithSlug = MutableSharedFlow<Pair<String, String>>(0)
+    val openStatsEventWithSlugForCountry: Flow<Pair<String, String>> = _openStatsEventWithSlug
 
     init {
         displayedPositionInList = usersCountry.combine(stateOfCountriesList) { country, state ->
@@ -47,14 +47,15 @@ class ListOfCountriesViewModel @ViewModelInject constructor(var lookupRepo: Look
     }
 
     fun onItemSelected(position: Int) {
-        val countrySlug: String = countriesList!![position].slug.takeUnless { it.isEmpty() } ?: run {
+        val country = countriesList!![position]
+        val countrySlug: String = country.slug.takeUnless { it.isEmpty() } ?: run {
             viewModelScope.launch {
                 _snackBarEvent.emit(context.getString(R.string.no_stats))
             }
             return@onItemSelected
         }
         viewModelScope.launch {
-            _openStatsEventWithSlug.emit(countrySlug)
+            _openStatsEventWithSlug.emit(Pair(countrySlug, country.country))
         }
     }
 

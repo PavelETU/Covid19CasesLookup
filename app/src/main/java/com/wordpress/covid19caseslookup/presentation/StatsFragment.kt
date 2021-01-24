@@ -35,6 +35,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 
 private const val SLUG = "slug"
+private const val NAME_OF_COUNTRY = "country"
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
@@ -43,12 +44,14 @@ class StatsFragment : Fragment() {
     // Non nullable variable to be accessed during view active lifecycle
     private val binding get() = _binding!!
     private lateinit var slug: String
+    private lateinit var nameOfCountry: String
     private val viewModel: CountryStatsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             slug = it.getString(SLUG)!!
+            nameOfCountry = it.getString(NAME_OF_COUNTRY)!!
             viewModel.onSlugObtained(slug)
         }
     }
@@ -96,7 +99,7 @@ class StatsFragment : Fragment() {
     }
 
     private fun adjustToolbar() {
-        (requireActivity() as AppCompatActivity).supportActionBar?.title = slug.capitalize()
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = nameOfCountry
         (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
     }
@@ -116,10 +119,11 @@ class StatsFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(slug: String) =
+        fun newInstance(slug: String, country: String) =
             StatsFragment().apply {
                 arguments = Bundle().apply {
                     putString(SLUG, slug)
+                    putString(NAME_OF_COUNTRY, country)
                 }
             }
     }
