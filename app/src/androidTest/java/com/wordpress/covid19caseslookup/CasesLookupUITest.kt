@@ -16,8 +16,17 @@ class CasesLookupUITest: CasesLookupRules() {
     fun listOfAvailableCountriesIsPresentedWhenAppIsOpened() {
         bddTestCase {
             givenIOpenTheApp()
-            iSeeATitle("Choose a country")
+            theTitleRead("Choose a country")
             iSeeListOfAvailableCountries()
+        }
+    }
+
+    @Test
+    fun theTitleCorrespondsToOpenedCountry() {
+        bddTestCase {
+            givenIOpenTheApp()
+            andIClickOnTheCountryWithTitle("Russian Federation")
+            theTitleRead("Russian Federation")
         }
     }
 }
