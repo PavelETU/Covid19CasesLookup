@@ -22,12 +22,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.ui.tooling.preview.Preview
 import com.wordpress.covid19caseslookup.androidframework.visible
 import com.wordpress.covid19caseslookup.databinding.FragmentStatsBinding
 import dagger.hilt.android.AndroidEntryPoint
