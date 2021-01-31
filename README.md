@@ -12,7 +12,6 @@ Uses:
 - SharedFlow
 - Hilt for dependency injection
 - View Binding
--
 
 Work in progress / TODO:
 - Add more UI tests:
