@@ -43,7 +43,7 @@ class ListOfCountriesFragment : Fragment() {
         super.onAttach(context)
         listener = context as? OnCountryChosenListener ?: throw ClassCastException("Activity should implement OnCountryChosenListener")
         lifecycleScope.launchWhenStarted {
-            viewModel.openStatsEventWithSlug.collect { listener.onCountryChosen(it) }
+            viewModel.openStatsEventWithSlugForCountry.collect { listener.onCountryChosen(it.first, it.second) }
         }
         lifecycleScope.launchWhenStarted {
             viewModel.snackBarEvent.collect { Snackbar.make(requireView(), it, Snackbar.LENGTH_SHORT).show() }
@@ -153,6 +153,6 @@ class ListOfCountriesFragment : Fragment() {
     }
 
     interface OnCountryChosenListener {
-        fun onCountryChosen(slug: String)
+        fun onCountryChosen(slug: String, country: String)
     }
 }

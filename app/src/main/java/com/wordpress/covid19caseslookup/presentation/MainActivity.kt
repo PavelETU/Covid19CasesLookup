@@ -15,8 +15,8 @@ class MainActivity : AppCompatActivity(), ListOfCountriesFragment.OnCountryChose
             supportFragmentManager.beginTransaction().add(R.id.container, ListOfCountriesFragment(), "List").commit()
     }
 
-    override fun onCountryChosen(slug: String) {
-        supportFragmentManager.beginTransaction().replace(R.id.container, StatsFragment.newInstance(slug), "Stats").addToBackStack(null).commit()
+    override fun onCountryChosen(slug: String, country: String) {
+        supportFragmentManager.beginTransaction().replace(R.id.container, StatsFragment.newInstance(slug, country), "Stats").addToBackStack(null).commit()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

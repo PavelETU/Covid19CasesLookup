@@ -1,8 +1,6 @@
 package com.wordpress.covid19caseslookup
 
 import android.content.Context
-import com.wordpress.covid19caseslookup.data.LookupRepo
-import com.wordpress.covid19caseslookup.data.entities.Country
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
 import com.wordpress.covid19caseslookup.presentation.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,16 +25,16 @@ class StatsScreenViewModelTest {
     private lateinit var viewModel: CountryStatsViewModel
     @Mock
     private lateinit var context: Context
-    private lateinit var repo: FakeRepository
+    private lateinit var repo: FakeRepo
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        repo = FakeRepository()
+        repo = FakeRepo(emptyList(), emptyList())
         viewModel = CountryStatsViewModel(repo, context)
     }
 
     @Test
-    fun `initial state is loading`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `initial state is loading`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         `when`(context.getString(R.string.no_stats)).thenReturn("")
         repo.block = {
             withContext(coroutineTestRule.testCoroutineDispatcher) {
@@ -51,7 +49,7 @@ class StatsScreenViewModelTest {
     }
 
     @Test
-    fun `error state after returning empty results`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `error state after returning empty results`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val emptyResults = "Empty"
         repo.block = {
             withContext(coroutineTestRule.testCoroutineDispatcher) {
@@ -68,15 +66,15 @@ class StatsScreenViewModelTest {
     }
 
     @Test
-    fun `error state in exception is thrown`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `error state in exception is thrown`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val errorString = "Error"
+        `when`(context.getString(R.string.something_went_wrong_tap_to_retry)).thenReturn(errorString)
         repo.block = {
             withContext(coroutineTestRule.testCoroutineDispatcher) {
                 delay(1000)
                 throw HttpException(Response.error<String>(404, ResponseBody.create(null, "Something is going on")))
             }
         }
-        `when`(context.getString(R.string.something_went_wrong_tap_to_retry)).thenReturn(errorString)
 
         viewModel.onSlugObtained("Mexico")
         advanceTimeBy(1000)
@@ -85,7 +83,7 @@ class StatsScreenViewModelTest {
     }
 
     @Test
-    fun `successful state after result is returned`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `successful state after result is returned`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
         )
@@ -103,7 +101,7 @@ class StatsScreenViewModelTest {
     }
 
     @Test
-    fun `months parsed correctly`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `months parsed correctly`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
             CountryStats(1100, 9, 950, "2020-01-25T00:00:00Z"),
@@ -118,7 +116,7 @@ class StatsScreenViewModelTest {
     }
 
     @Test
-    fun `all months parsed correctly`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `all months parsed correctly`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
             CountryStats(1100, 9, 950, "2020-01-25T00:00:00Z"),
@@ -152,7 +150,7 @@ class StatsScreenViewModelTest {
     }
 
     @Test
-    fun `after parsing confirmed cases for last month are displayed`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `after parsing confirmed cases for last month are displayed`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
             CountryStats(1100, 9, 950, "2020-01-25T00:00:00Z"),
@@ -169,7 +167,7 @@ class StatsScreenViewModelTest {
     }
 
     @Test
-    fun `after parsing confirmed cases for last month are displayed even for sinle record`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `after parsing confirmed cases for last month are displayed even for single record`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(88, 1, 70, "2020-01-22T00:00:00Z"),
         )
@@ -181,7 +179,7 @@ class StatsScreenViewModelTest {
     }
 
     @Test
-    fun `confirm right data after switching types of cases for the last month`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `confirm right data after switching types of cases for the last month`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
             CountryStats(1100, 9, 950, "2020-01-25T00:00:00Z"),
@@ -205,7 +203,7 @@ class StatsScreenViewModelTest {
     }
 
     @Test
-    fun `confirmed cases for different months updated properly`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `confirmed cases for different months updated properly`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
             CountryStats(1050, 12, 956, "2020-02-25T00:00:00Z"),
@@ -219,24 +217,24 @@ class StatsScreenViewModelTest {
 
         viewModel.onSlugObtained("Mexico")
 
-        viewModel.monthClick("Jan")
+        viewModel.monthClick(0)
         assertEquals(listOf(RecordWithCases(1000, "22th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Feb")
+        viewModel.monthClick(1)
         assertEquals(listOf(RecordWithCases(50, "25th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Mar")
+        viewModel.monthClick(2)
         assertEquals(listOf(RecordWithCases(250, "5th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Apr")
+        viewModel.monthClick(3)
         assertEquals(listOf(RecordWithCases(200, "10th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("May")
+        viewModel.monthClick(4)
         assertEquals(listOf(RecordWithCases(100, "20th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Oct")
+        viewModel.monthClick(5)
         assertEquals(listOf(RecordWithCases(100, "18th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Nov")
+        viewModel.monthClick(6)
         assertEquals(listOf(RecordWithCases(102, "25th")), viewModel.statsToDisplay.value)
     }
 
     @Test
-    fun `lethal cases for different months updated properly`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `lethal cases for different months updated properly`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
             CountryStats(1059, 10, 956, "2020-02-25T00:00:00Z"),
@@ -251,24 +249,24 @@ class StatsScreenViewModelTest {
         viewModel.onSlugObtained("Mexico")
 
         viewModel.lethalClick()
-        viewModel.monthClick("Jan")
+        viewModel.monthClick(0)
         assertEquals(listOf(RecordWithCases(5, "22th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Feb")
+        viewModel.monthClick(1)
         assertEquals(listOf(RecordWithCases(5, "25th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Mar")
+        viewModel.monthClick(2)
         assertEquals(listOf(RecordWithCases(6, "5th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Apr")
+        viewModel.monthClick(3)
         assertEquals(listOf(RecordWithCases(4, "10th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("May")
+        viewModel.monthClick(4)
         assertEquals(listOf(RecordWithCases(5, "20th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Oct")
+        viewModel.monthClick(5)
         assertEquals(listOf(RecordWithCases(5, "18th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Nov")
+        viewModel.monthClick(6)
         assertEquals(listOf(RecordWithCases(15, "25th")), viewModel.statsToDisplay.value)
     }
 
     @Test
-    fun `recovered cases for different months updated properly`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `recovered cases for different months updated properly`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
             CountryStats(1059, 12, 956, "2020-02-25T00:00:00Z"),
@@ -283,24 +281,24 @@ class StatsScreenViewModelTest {
         viewModel.onSlugObtained("Mexico")
 
         viewModel.recoveredClick()
-        viewModel.monthClick("Jan")
+        viewModel.monthClick(0)
         assertEquals(listOf(RecordWithCases(900, "22th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Feb")
+        viewModel.monthClick(1)
         assertEquals(listOf(RecordWithCases(56, "25th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Mar")
+        viewModel.monthClick(2)
         assertEquals(listOf(RecordWithCases(44, "5th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Apr")
+        viewModel.monthClick(3)
         assertEquals(listOf(RecordWithCases(10, "10th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("May")
+        viewModel.monthClick(4)
         assertEquals(listOf(RecordWithCases(10, "20th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Oct")
+        viewModel.monthClick(5)
         assertEquals(listOf(RecordWithCases(10, "18th")), viewModel.statsToDisplay.value)
-        viewModel.monthClick("Nov")
+        viewModel.monthClick(6)
         assertEquals(listOf(RecordWithCases(70, "25th")), viewModel.statsToDisplay.value)
     }
 
     @Test
-    fun `when data corrupted parse cases as 0`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `when data corrupted parse cases as 0`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-22T00:00:00Z"),
             CountryStats(900, 2, 1, "2020-02-23T00:00:00Z")
@@ -315,7 +313,7 @@ class StatsScreenViewModelTest {
         viewModel.onSlugObtained("Mexico")
         advanceTimeBy(1000)
 
-        viewModel.monthClick("Feb")
+        viewModel.monthClick(1)
         assertEquals(listOf(RecordWithCases(0, "23th")), viewModel.statsToDisplay.value)
         viewModel.lethalClick()
         assertEquals(listOf(RecordWithCases(0, "23th")), viewModel.statsToDisplay.value)
@@ -324,7 +322,7 @@ class StatsScreenViewModelTest {
     }
 
     @Test
-    fun `ordinal dates are correct`() = coroutineTestRule.testCoroutineScope.runBlockingTest {
+    fun `ordinal dates are correct`() = coroutineTestRule.testCoroutineDispatcher.runBlockingTest {
         val listOfStats = listOf(
             CountryStats(1000, 5, 900, "2020-01-01T00:00:00Z"),
             CountryStats(1000, 5, 900, "2020-01-02T00:00:00Z"),
@@ -375,17 +373,4 @@ class StatsScreenViewModelTest {
             RecordWithCases(0, "28th"), RecordWithCases(0, "29th"), RecordWithCases(0, "30th"),
             RecordWithCases(0, "31th")), viewModel.statsToDisplay.value)
     }
-}
-
-private class FakeRepository @ExperimentalCoroutinesApi constructor(): LookupRepo {
-    lateinit var block: suspend () -> List<CountryStats>
-
-    override suspend fun getCountries(): List<Country> {
-        throw UnsupportedOperationException()
-    }
-
-    override suspend fun getCountrySummary(countrySlug: String): List<CountryStats> {
-        return block()
-    }
-
 }

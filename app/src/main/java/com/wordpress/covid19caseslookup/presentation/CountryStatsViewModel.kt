@@ -25,8 +25,8 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
     private var lethalCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
     private var recoveredCasesByMonth = SparseArrayCompat<List<RecordWithCases>>()
     private var currentCases = SparseArrayCompat<List<RecordWithCases>>()
-    private val _displayedMonth = MutableStateFlow("")
-    val displayedMonth: StateFlow<String> = _displayedMonth
+    private val _displayedMonth = MutableStateFlow(0)
+    val displayedMonth: StateFlow<Int> = _displayedMonth
     var monthsToDisplay: List<String> = emptyList()
     private var slug: String? = null
 
@@ -56,13 +56,13 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
         updateScreen()
     }
 
-    fun monthClick(month: String) {
-        _displayedMonth.value = month
+    fun monthClick(position: Int) {
+        _displayedMonth.value = position
         updateScreen()
     }
 
     private fun updateScreen() {
-        _statsToDisplay.value = currentCases.get(monthsToDisplay.indexOf(displayedMonth.value))!!
+        _statsToDisplay.value = currentCases.get(displayedMonth.value)!!
     }
 
     private fun loadStats() {
@@ -120,7 +120,7 @@ class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupR
                 indexOfPopulatedMonth++
             }
             currentCases = confirmedCasesByMonth
-            _displayedMonth.value = months.last()
+            _displayedMonth.value = months.lastIndex
             monthsToDisplay = months
             updateScreen()
             Success

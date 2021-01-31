@@ -18,16 +18,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.LinearGradient
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.viewModel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.ui.tooling.preview.Preview
 import com.wordpress.covid19caseslookup.androidframework.visible
 import com.wordpress.covid19caseslookup.databinding.FragmentStatsBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,6 +35,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 
 private const val SLUG = "slug"
+private const val NAME_OF_COUNTRY = "country"
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
@@ -43,12 +44,14 @@ class StatsFragment : Fragment() {
     // Non nullable variable to be accessed during view active lifecycle
     private val binding get() = _binding!!
     private lateinit var slug: String
+    private lateinit var nameOfCountry: String
     private val viewModel: CountryStatsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             slug = it.getString(SLUG)!!
+            nameOfCountry = it.getString(NAME_OF_COUNTRY)!!
             viewModel.onSlugObtained(slug)
         }
     }
@@ -96,7 +99,7 @@ class StatsFragment : Fragment() {
     }
 
     private fun adjustToolbar() {
-        (requireActivity() as AppCompatActivity).supportActionBar?.title = slug.capitalize()
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = nameOfCountry
         (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(true)
     }
@@ -116,10 +119,11 @@ class StatsFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(slug: String) =
+        fun newInstance(slug: String, country: String) =
             StatsFragment().apply {
                 arguments = Bundle().apply {
                     putString(SLUG, slug)
+                    putString(NAME_OF_COUNTRY, country)
                 }
             }
     }
@@ -133,18 +137,18 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
             verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start,
             modifier = Modifier.fillMaxHeight()
         ) {
-            viewModel.monthsToDisplay.forEach { month ->
-                val value = viewModel.displayedMonth.collectAsState()
+            viewModel.monthsToDisplay.forEachIndexed { index, month ->
+                val indexOfSelectedMonth = viewModel.displayedMonth.collectAsState()
                 Row(
                     modifier = Modifier.padding(2.dp).selectable(
-                        selected = (value.value == month),
-                        onClick = { viewModel.monthClick(month) }
+                        selected = (indexOfSelectedMonth.value == index),
+                        onClick = { viewModel.monthClick(index) }
                     ).width(60.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
-                        selected = (value.value == month),
-                        onClick = { viewModel.monthClick(month) })
+                        selected = (indexOfSelectedMonth.value == index),
+                        onClick = { viewModel.monthClick(index) })
                     Spacer(modifier = Modifier.width(2.dp))
                     BasicText(text = month)
                 }
@@ -181,7 +185,8 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
                         }
                     }
                     if (recordWithCases.cases != 0)
-                        drawRect(LinearGradient(listOf(Color.Green, endColorForGradient), 0F, y + middleOfTheBar, rightOfTheBar, y + middleOfTheBar),
+                        drawRect(Brush.linearGradient(listOf(Color.Green, endColorForGradient),
+                            Offset(0F, y + middleOfTheBar), Offset(rightOfTheBar, y + middleOfTheBar)),
                             Offset(0F, y + padding), Size(rightOfTheBar, heightOfOneBar))
                     drawIntoCanvas {
                         paint.textSize = 50F
