@@ -17,9 +17,9 @@ class RepositoryImplForUITest @Inject constructor(): LookupRepo {
             "KI"
         ),
         Country(
-            "Ireland",
-            "ireland",
-            "IE"
+            "United Kingdom",
+            "uk",
+            "UK"
         ),
         Country(
             "Russian Federation",

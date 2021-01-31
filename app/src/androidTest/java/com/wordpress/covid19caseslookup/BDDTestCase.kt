@@ -17,10 +17,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.hamcrest.CoreMatchers.allOf
 
 @ExperimentalCoroutinesApi
-fun CasesLookupRules.bddTestCase(func: BDDTestCase.() -> Unit): BDDTestCase {
+fun CasesLookupRules.bddTestCase(func: BDDTestCase.() -> Unit) {
     val bddTestCase = BDDTestCase(activityScenarioRule)
     bddTestCase.func()
-    return bddTestCase
 }
 
 class BDDTestCase(private val composeScenarioRule: AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>) {
@@ -31,7 +30,7 @@ class BDDTestCase(private val composeScenarioRule: AndroidComposeTestRule<Activi
     fun iSeeListOfAvailableCountries() {
         onView(withText("Croatia")).check(matches(isCompletelyDisplayed()))
         onView(withText("Kiribati")).check(matches(isCompletelyDisplayed()))
-        onView(withText("Ireland")).check(matches(isCompletelyDisplayed()))
+        onView(withText("United Kingdom")).check(matches(isCompletelyDisplayed()))
         onView(withText("Russian Federation")).check(matches(isCompletelyDisplayed()))
     }
 
