@@ -18,7 +18,6 @@ Work in progress / TODO:
     - Check stats
     - Check stats changing after changing months/types of cases
 - Add Room backup
-- Add search button to the countries list
 - Change colors for recovered cases
 - Detect location on the fly instead of checking for the last obtained location
 

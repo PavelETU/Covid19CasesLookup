@@ -15,6 +15,8 @@ class ListOfCountriesViewModel @ViewModelInject constructor(var lookupRepo: Look
     private val _stateOfCountriesList: MutableStateFlow<StateOfListOfCountriesScreen> = MutableStateFlow(CountriesLoading)
     val stateOfCountriesList: StateFlow<StateOfListOfCountriesScreen> = _stateOfCountriesList
     private var countriesList: List<Country>? = null
+    private var countriesListPresentation: List<String>? = null
+    private var countriesListToDisplay: MutableStateFlow<List<String>>? = null
     var displayedPositionInList: Flow<Int>
     private var usersCountry = MutableStateFlow("")
     private val _snackBarEvent = MutableSharedFlow<String>()
@@ -25,7 +27,7 @@ class ListOfCountriesViewModel @ViewModelInject constructor(var lookupRepo: Look
     init {
         displayedPositionInList = usersCountry.combine(stateOfCountriesList) { country, state ->
             if (country.isNotEmpty() && (state is CountriesLoaded)) {
-                state.countries.indexOf(country)
+                state.countries.value.indexOf(country)
             } else {
                 INVALID_COUNTRY_POSITION
             }
@@ -42,13 +44,19 @@ class ListOfCountriesViewModel @ViewModelInject constructor(var lookupRepo: Look
         viewModelScope.launch {
             countriesList = lookupRepo.getCountries()
             _stateOfCountriesList.value =
-                if (countriesList.isNullOrEmpty()) CountriesFailedToLoad else CountriesLoaded(countriesList!!.map { it.country })
+                if (countriesList.isNullOrEmpty()) {
+                    CountriesFailedToLoad
+                } else {
+                    countriesListPresentation = countriesList!!.map { it.country }
+                    countriesListToDisplay = MutableStateFlow(countriesListPresentation!!)
+                    CountriesLoaded(countriesListToDisplay!!)
+                }
         }
     }
 
     fun onItemSelected(position: Int) {
-        val country = countriesList!![position]
-        val countrySlug: String = country.slug.takeUnless { it.isEmpty() } ?: run {
+        val country = countriesList!!.find { it.country == countriesListToDisplay!!.value[position] }
+        val countrySlug: String = country!!.slug.takeUnless { it.isEmpty() } ?: run {
             viewModelScope.launch {
                 _snackBarEvent.emit(context.getString(R.string.no_stats))
             }
@@ -64,5 +72,12 @@ class ListOfCountriesViewModel @ViewModelInject constructor(var lookupRepo: Look
         usersCountry.value = countryName
     }
 
-
+    fun onQueryChanged(searchTerm: String?) {
+        countriesListToDisplay ?: return
+        if (searchTerm.isNullOrBlank()) {
+            countriesListToDisplay?.value = countriesListPresentation!!
+            return
+        }
+        countriesListToDisplay!!.value = countriesListPresentation!!.filter { it.contains(searchTerm, true) }
+    }
 }

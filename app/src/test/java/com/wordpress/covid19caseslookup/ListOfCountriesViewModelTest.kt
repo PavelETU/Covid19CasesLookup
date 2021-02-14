@@ -81,6 +81,6 @@ class ListOfCountriesViewModelTest {
 
         assertTrue(viewModel.stateOfCountriesList.value is CountriesLoaded)
         assertEquals(listOf("Croatia", "Kiribati", "Ireland", "Russian Federation"),
-            (viewModel.stateOfCountriesList.value as CountriesLoaded).countries)
+            (viewModel.stateOfCountriesList.value as CountriesLoaded).countries.value)
     }
 }

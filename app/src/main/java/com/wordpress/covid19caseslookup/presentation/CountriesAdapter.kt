@@ -5,10 +5,16 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.wordpress.covid19caseslookup.R
 
-class CountriesAdapter(private val countries: List<String>, private val listener: ClickListener): RecyclerView.Adapter<CountriesAdapter.ViewHolder>() {
+class CountriesAdapter(private val listener: ClickListener): ListAdapter<String, CountriesAdapter.ViewHolder>(object : DiffUtil.ItemCallback<String>() {
+    override fun areItemsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
+
+    override fun areContentsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
+}) {
     class ViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView)
     private var runAnimation = false
     private var positionToAnimate: Int? = null
@@ -19,12 +25,10 @@ class CountriesAdapter(private val countries: List<String>, private val listener
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.country_item, parent, false) as TextView)
     }
 
-    override fun getItemCount() = countries.size
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val textView = holder.textView
         textView.setOnClickListener { listener.onItemClick(position) }
-        textView.text = countries[position]
+        textView.text = getItem(position)
         if (runAnimation) {
             runAnimation = false
             animatedHolder = holder
@@ -42,7 +46,7 @@ class CountriesAdapter(private val countries: List<String>, private val listener
     fun animateItem(position: Int) {
         runAnimation = true
         positionToAnimate = position
-        notifyItemChanged(position)
+        // TODO implement animation using different view holders type
     }
 
     interface ClickListener {
