@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.collect
 
 private const val SLUG = "slug"
 private const val NAME_OF_COUNTRY = "country"
+private const val DARK_GREEN = 0xFF306844
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
@@ -175,7 +176,7 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
                     val rightOfTheBar = recordWithCases.cases * widthForOneCase
                     val endColorForGradient = when {
                         rightOfTheBar < size.width/2 -> {
-                            Color.Cyan
+                            Color(DARK_GREEN)
                         }
                         rightOfTheBar < size.width/1.5 -> {
                             Color.Magenta
