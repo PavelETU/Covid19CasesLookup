@@ -24,4 +24,3 @@ Work in progress / TODO:
 For the last stable version checkout master branch
 
 <img src="screenshots/second_updated_colors.png" width="200">
-<src="screenshots/covid_lookup.mp4" width="200">
