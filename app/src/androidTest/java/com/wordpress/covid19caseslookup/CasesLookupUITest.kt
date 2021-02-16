@@ -40,4 +40,11 @@ class CasesLookupUITest : CasesLookupRules() {
             )
         )
     }
+
+    @Test
+    fun iCanSearchListOfCountries() = bddTestCase {
+        givenIOpenTheApp()
+        andIFillTheSearchWith("un")
+        iSeeOnlyFollowingCountries(listOf("United Kingdom"))
+    }
 }

@@ -7,10 +7,9 @@ import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -23,13 +22,14 @@ import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.androidframework.visible
 import com.wordpress.covid19caseslookup.databinding.FragmentListOfCountriesBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
 @AndroidEntryPoint
-class ListOfCountriesFragment : Fragment() {
+class ListOfCountriesFragment : Fragment(), SearchView.OnQueryTextListener {
 
     private var _binding: FragmentListOfCountriesBinding? = null
     // Non nullable variable to be accessed during view active lifecycle
@@ -51,6 +51,24 @@ class ListOfCountriesFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             viewModel.displayedPositionInList.collect { highlightPosition(it) }
         }
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.countries_screen_menu, menu)
+        (menu.findItem(R.id.action_search).actionView as SearchView).apply {
+            setOnQueryTextListener(this@ListOfCountriesFragment)
+        }
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        viewModel.onQueryChanged(newText)
+        return true
+    }
+
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        viewModel.onQueryChanged(query)
+        return false
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -104,13 +122,18 @@ class ListOfCountriesFragment : Fragment() {
         else tryToGetLocation()
     }
 
-    private fun displayCountries(countries: List<String>) {
+    private fun displayCountries(countries: StateFlow<List<String>>) {
         binding.listOfCountries.visibility = View.VISIBLE
-        binding.listOfCountries.adapter = CountriesAdapter(countries, object: CountriesAdapter.ClickListener {
+        binding.listOfCountries.adapter = CountriesAdapter(object: CountriesAdapter.ClickListener {
             override fun onItemClick(position: Int) {
                 viewModel.onItemSelected(position)
             }
         })
+        viewLifecycleOwner.lifecycleScope.launch {
+            countries.collect {
+                (binding.listOfCountries.adapter as CountriesAdapter).submitList(it)
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(

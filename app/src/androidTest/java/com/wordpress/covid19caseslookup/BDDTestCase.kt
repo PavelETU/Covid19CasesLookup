@@ -1,6 +1,7 @@
 package com.wordpress.covid19caseslookup
 
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.assertCountEquals
@@ -8,10 +9,12 @@ import androidx.compose.ui.test.isNotHidden
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import com.wordpress.covid19caseslookup.espressocustom.hasItemCount
 import com.wordpress.covid19caseslookup.presentation.MainActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.hamcrest.CoreMatchers.allOf
@@ -40,7 +43,7 @@ class BDDTestCase(private val composeScenarioRule: AndroidComposeTestRule<Activi
     }
 
     fun andIClickOnTheCountryWithTitle(title: String) {
-        onView(withText(title)).perform(ViewActions.click())
+        onView(withText(title)).perform(click())
     }
 
     fun iSeeFollowingTypesOfStats(types: List<String>) {
@@ -58,7 +61,16 @@ class BDDTestCase(private val composeScenarioRule: AndroidComposeTestRule<Activi
             val onAllNodesWithText = composeScenarioRule.onAllNodesWithText(it.key, useUnmergedTree = true)
             onAllNodesWithText.assertCountEquals(it.value)
             onAllNodesWithText.assertAll(isNotHidden())
-
         }
+    }
+
+    fun andIFillTheSearchWith(searchQuery: String) {
+        onView(withId(R.id.action_search)).perform(click())
+        onView(isAssignableFrom(AppCompatAutoCompleteTextView::class.java)).perform(typeText(searchQuery))
+    }
+
+    fun iSeeOnlyFollowingCountries(countries: List<String>) {
+        onView(withId(R.id.list_of_countries)).check(matches(hasItemCount(countries.size)))
+        countries.onEach { onView(withText(it)).check(matches(isDisplayed())) }
     }
 }

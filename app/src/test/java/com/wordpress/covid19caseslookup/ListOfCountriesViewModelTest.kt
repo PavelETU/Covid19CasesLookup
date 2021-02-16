@@ -81,6 +81,42 @@ class ListOfCountriesViewModelTest {
 
         assertTrue(viewModel.stateOfCountriesList.value is CountriesLoaded)
         assertEquals(listOf("Croatia", "Kiribati", "Ireland", "Russian Federation"),
-            (viewModel.stateOfCountriesList.value as CountriesLoaded).countries)
+            (viewModel.stateOfCountriesList.value as CountriesLoaded).countries.value)
+    }
+
+    @Test
+    fun `countries sorted as per search term`() {
+        //List of countries "Croatia", "Kiribati", "Ireland", "Russian Federation"
+        repo.setCountries(listOfCountries)
+
+        viewModel.retry()
+
+        viewModel.onQueryChanged("i")
+        assertEquals(listOf("Croatia", "Kiribati", "Ireland", "Russian Federation"),
+            (viewModel.stateOfCountriesList.value as CountriesLoaded).countries.value)
+
+        viewModel.onQueryChanged("ir")
+        assertEquals(listOf("Kiribati", "Ireland"),
+            (viewModel.stateOfCountriesList.value as CountriesLoaded).countries.value)
+
+        viewModel.onQueryChanged("ire")
+        assertEquals(listOf("Ireland"),
+            (viewModel.stateOfCountriesList.value as CountriesLoaded).countries.value)
+
+        viewModel.onQueryChanged("ir")
+        assertEquals(listOf("Kiribati", "Ireland"),
+            (viewModel.stateOfCountriesList.value as CountriesLoaded).countries.value)
+
+        viewModel.onQueryChanged("i")
+        assertEquals(listOf("Croatia", "Kiribati", "Ireland", "Russian Federation"),
+            (viewModel.stateOfCountriesList.value as CountriesLoaded).countries.value)
+
+        viewModel.onQueryChanged("")
+        assertEquals(listOf("Croatia", "Kiribati", "Ireland", "Russian Federation"),
+            (viewModel.stateOfCountriesList.value as CountriesLoaded).countries.value)
+
+        viewModel.onQueryChanged(null)
+        assertEquals(listOf("Croatia", "Kiribati", "Ireland", "Russian Federation"),
+            (viewModel.stateOfCountriesList.value as CountriesLoaded).countries.value)
     }
 }
