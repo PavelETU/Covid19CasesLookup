@@ -10,43 +10,57 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.wordpress.covid19caseslookup.R
 
-class CountriesAdapter(private val listener: ClickListener): ListAdapter<String, CountriesAdapter.ViewHolder>(object : DiffUtil.ItemCallback<String>() {
-    override fun areItemsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
+private const val DEFAULT_ITEM = 1
+private const val ANIMATED_ITEM = 2
 
-    override fun areContentsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
-}) {
+class CountriesAdapter(private val listener: ClickListener) :
+    ListAdapter<String, CountriesAdapter.ViewHolder>(object : DiffUtil.ItemCallback<String>() {
+        override fun areItemsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
+
+        override fun areContentsTheSame(oldItem: String, newItem: String): Boolean =
+            oldItem == newItem
+    }) {
     class ViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView)
+
     private var runAnimation = false
     private var positionToAnimate: Int? = null
-    private var animatedHolder: ViewHolder? = null
-    private var objectAnimator: ObjectAnimator? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.country_item, parent, false) as TextView)
+        return ViewHolder(
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.country_item, parent, false) as TextView
+        )
     }
+
+    override fun getItemViewType(position: Int) =
+        if (runAnimation && position == positionToAnimate) ANIMATED_ITEM
+        else DEFAULT_ITEM
+
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val textView = holder.textView
-        textView.setOnClickListener { listener.onItemClick(position) }
+        textView.setOnClickListener { listener.onItemClick(holder.adapterPosition) }
         textView.text = getItem(position)
-        if (runAnimation) {
+        if (holder.itemViewType == ANIMATED_ITEM) {
             runAnimation = false
-            animatedHolder = holder
-            objectAnimator = ObjectAnimator.ofArgb(textView, "backgroundColor", Color.WHITE, Color.MAGENTA, Color.WHITE, Color.GRAY, Color.WHITE).apply {
+            ObjectAnimator.ofArgb(
+                textView,
+                "backgroundColor",
+                Color.WHITE,
+                Color.MAGENTA,
+                Color.WHITE,
+                Color.GRAY,
+                Color.WHITE
+            ).apply {
                 duration = 3000
                 start()
             }
-        } else if (animatedHolder == holder && position != positionToAnimate && objectAnimator?.isRunning == true) {
-            objectAnimator!!.end()
-            animatedHolder = null
-            positionToAnimate = null
         }
     }
 
     fun animateItem(position: Int) {
         runAnimation = true
         positionToAnimate = position
-        // TODO implement animation using different view holders type
     }
 
     interface ClickListener {
