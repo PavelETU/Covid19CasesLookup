@@ -1,4 +1,4 @@
-package com.wordpress.covid19caseslookup
+package com.wordpress.covid19caseslookup.plumbing
 
 import com.wordpress.covid19caseslookup.data.LookupRepo
 import com.wordpress.covid19caseslookup.data.entities.Country

@@ -14,7 +14,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "com.wordpress.covid19caseslookup.TestRunnerForUsingTestApplicationClass"
+        testInstrumentationRunner "com.wordpress.covid19caseslookup.plumbing.TestRunnerForUsingTestApplicationClass"
     }
 
     buildTypes {

@@ -1,4 +1,4 @@
-package com.wordpress.covid19caseslookup
+package com.wordpress.covid19caseslookup.plumbing
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.rule.GrantPermissionRule

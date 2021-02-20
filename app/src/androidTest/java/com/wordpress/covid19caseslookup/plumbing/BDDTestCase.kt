@@ -1,4 +1,4 @@
-package com.wordpress.covid19caseslookup
+package com.wordpress.covid19caseslookup.plumbing
 
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
@@ -14,6 +14,7 @@ import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.espressocustom.hasItemCount
 import com.wordpress.covid19caseslookup.presentation.MainActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi

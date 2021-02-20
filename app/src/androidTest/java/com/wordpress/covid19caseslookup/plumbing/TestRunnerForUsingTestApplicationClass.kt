@@ -1,4 +1,4 @@
-package com.wordpress.covid19caseslookup
+package com.wordpress.covid19caseslookup.plumbing
 
 import android.app.Application
 import android.content.Context
