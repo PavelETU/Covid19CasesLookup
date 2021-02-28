@@ -23,4 +23,4 @@ Work in progress / TODO:
 
 For the last stable version checkout master branch
 
-<img src="screenshots/second_updated_colors.png" width="200">
+<img src="media/stats.gif">
