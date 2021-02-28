@@ -7,8 +7,8 @@ import com.wordpress.covid19caseslookup.presentation.MainActivity
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Rule
@@ -32,7 +32,7 @@ open class CasesLookupRules {
     }
 
     @Module
-    @InstallIn(ApplicationComponent::class)
+    @InstallIn(SingletonComponent::class)
     abstract class RepoRestModule {
         @Singleton
         @Binds

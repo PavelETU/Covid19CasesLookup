@@ -3,9 +3,7 @@ package com.wordpress.covid19caseslookup.plumbing
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
 import androidx.appcompat.widget.Toolbar
-import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.isNotHidden
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.test.espresso.Espresso.onView
@@ -61,7 +59,6 @@ class BDDTestCase(private val composeScenarioRule: AndroidComposeTestRule<Activi
         monthToMonthsCount.forEach {
             val onAllNodesWithText = composeScenarioRule.onAllNodesWithText(it.key, useUnmergedTree = true)
             onAllNodesWithText.assertCountEquals(it.value)
-            onAllNodesWithText.assertAll(isNotHidden())
         }
     }
 
