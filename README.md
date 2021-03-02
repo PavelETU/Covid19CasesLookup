@@ -5,7 +5,7 @@ Uses:
 - Jetpack Compose (integration into existing UI)
 - BDD style UI tests:
     - Example (see more in CasesLookupUITest): 
-    ```
+    ```kotlin
     @Test
     fun iCanSearchListOfCountries() = bddTestCase {
         givenIOpenTheApp()
