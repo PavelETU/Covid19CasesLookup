@@ -1,17 +1,20 @@
 package com.wordpress.covid19caseslookup.presentation
 
 import android.content.Context
-import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.data.LookupRepo
 import com.wordpress.covid19caseslookup.data.entities.Country
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 const val INVALID_COUNTRY_POSITION = -1
-class ListOfCountriesViewModel @ViewModelInject constructor(var lookupRepo: LookupRepo, @ApplicationContext private val context: Context) : ViewModel() {
+@HiltViewModel
+class ListOfCountriesViewModel @Inject constructor(var lookupRepo: LookupRepo, @ApplicationContext private val context: Context) : ViewModel() {
     private val _stateOfCountriesList: MutableStateFlow<StateOfListOfCountriesScreen> = MutableStateFlow(CountriesLoading)
     val stateOfCountriesList: StateFlow<StateOfListOfCountriesScreen> = _stateOfCountriesList
     private var countriesList: List<Country>? = null
