@@ -28,7 +28,6 @@ Work in progress / TODO:
     - Check stats changing after changing months/types of cases
 - Add Room backup
 - Change colors for recovered cases
-- Detect location on the fly instead of checking for the last obtained location
 
 For the last stable version checkout master branch
 

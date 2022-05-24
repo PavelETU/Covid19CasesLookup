@@ -16,7 +16,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.snackbar.Snackbar
 import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.androidframework.visible
@@ -32,6 +34,7 @@ private const val LOCATION_PERMISSION_REQUEST_CODE = 1
 class ListOfCountriesFragment : Fragment(), SearchView.OnQueryTextListener {
 
     private var _binding: FragmentListOfCountriesBinding? = null
+
     // Non nullable variable to be accessed during view active lifecycle
     private val binding get() = _binding!!
     private val viewModel: ListOfCountriesViewModel by viewModels()
@@ -41,12 +44,24 @@ class ListOfCountriesFragment : Fragment(), SearchView.OnQueryTextListener {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        listener = context as? OnCountryChosenListener ?: throw ClassCastException("Activity should implement OnCountryChosenListener")
+        listener = context as? OnCountryChosenListener
+            ?: throw ClassCastException("Activity should implement OnCountryChosenListener")
         lifecycleScope.launchWhenStarted {
-            viewModel.openStatsEventWithSlugForCountry.collect { listener.onCountryChosen(it.first, it.second) }
+            viewModel.openStatsEventWithSlugForCountry.collect {
+                listener.onCountryChosen(
+                    it.first,
+                    it.second
+                )
+            }
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.snackBarEvent.collect { Snackbar.make(requireView(), it, Snackbar.LENGTH_SHORT).show() }
+            viewModel.snackBarEvent.collect {
+                Snackbar.make(
+                    requireView(),
+                    it,
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
         }
         lifecycleScope.launchWhenResumed {
             viewModel.displayedPositionInList.collect { highlightPosition(it) }
@@ -78,7 +93,7 @@ class ListOfCountriesFragment : Fragment(), SearchView.OnQueryTextListener {
         checkPermissionAndTryToGetLocation()
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.stateOfCountriesList.collect { status ->
-                when(status) {
+                when (status) {
                     is CountriesLoading -> {
                         binding.errorView.visible(false)
                         binding.loadingIndicator.visible(true)
@@ -98,7 +113,8 @@ class ListOfCountriesFragment : Fragment(), SearchView.OnQueryTextListener {
     }
 
     private fun adjustToolbar() {
-        (requireActivity() as AppCompatActivity).supportActionBar?.title = getString(R.string.choose_country)
+        (requireActivity() as AppCompatActivity).supportActionBar?.title =
+            getString(R.string.choose_country)
         (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
         (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayShowHomeEnabled(false)
     }
@@ -117,14 +133,21 @@ class ListOfCountriesFragment : Fragment(), SearchView.OnQueryTextListener {
     }
 
     private fun checkPermissionAndTryToGetLocation() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        )
+            requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
         else tryToGetLocation()
     }
 
     private fun displayCountries(countries: StateFlow<List<String>>) {
         binding.listOfCountries.visibility = View.VISIBLE
-        binding.listOfCountries.adapter = CountriesAdapter(object: CountriesAdapter.ClickListener {
+        binding.listOfCountries.adapter = CountriesAdapter(object : CountriesAdapter.ClickListener {
             override fun onItemClick(position: Int) {
                 viewModel.onItemSelected(position)
             }
@@ -149,7 +172,10 @@ class ListOfCountriesFragment : Fragment(), SearchView.OnQueryTextListener {
     @SuppressLint("MissingPermission")
     private fun tryToGetLocation() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-        fusedLocationClient.lastLocation.addOnSuccessListener {
+        fusedLocationClient.getCurrentLocation(
+            LocationRequest.PRIORITY_LOW_POWER,
+            CancellationTokenSource().token
+        ).addOnSuccessListener {
             it ?: return@addOnSuccessListener
             processLocation(it)
         }
