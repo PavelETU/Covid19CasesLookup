@@ -143,14 +143,13 @@ fun ViewForStats(viewModel: CountryStatsViewModel) {
                     modifier = Modifier.padding(2.dp).selectable(
                         selected = (indexOfSelectedMonth.value == index),
                         onClick = { viewModel.monthClick(index) }
-                    ).width(60.dp),
+                    ).width(75.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
                         selected = (indexOfSelectedMonth.value == index),
                         onClick = { viewModel.monthClick(index) })
-                    Spacer(modifier = Modifier.width(2.dp))
-                    BasicText(text = month)
+                    BasicText(text = month, softWrap = false)
                 }
             }
         }
