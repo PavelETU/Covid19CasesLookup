@@ -28,6 +28,8 @@ Work in progress / TODO:
     - Check stats changing after changing months/types of cases
 - Add Room backup
 - Change colors for recovered cases
+- Add alternative names for countries (to align name of the country from Covid API with Location API)
+- Add years to the top in Cases screen
 
 For the last stable version checkout master branch
 
