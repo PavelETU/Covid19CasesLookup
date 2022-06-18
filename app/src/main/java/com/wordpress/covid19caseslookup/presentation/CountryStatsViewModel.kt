@@ -2,21 +2,23 @@ package com.wordpress.covid19caseslookup.presentation
 
 import android.content.Context
 import androidx.collection.SparseArrayCompat
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wordpress.covid19caseslookup.R
 import com.wordpress.covid19caseslookup.data.LookupRepo
 import com.wordpress.covid19caseslookup.data.entities.CountryStats
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
-class CountryStatsViewModel @ViewModelInject constructor(var lookupRepo: LookupRepo,
-                                                         @ApplicationContext private val context: Context) : ViewModel() {
+@HiltViewModel
+class CountryStatsViewModel @Inject constructor(var lookupRepo: LookupRepo,
+                                                    @ApplicationContext private val context: Context) : ViewModel() {
     private val _stateOfStatsScreen = MutableStateFlow<StateOfStatsScreen>(Loading)
     val stateOfStatsScreen: StateFlow<StateOfStatsScreen> = _stateOfStatsScreen
     private val _statsToDisplay = MutableStateFlow<List<RecordWithCases>>(emptyList())

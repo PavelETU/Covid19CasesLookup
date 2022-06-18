@@ -6,10 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.runtime.Composable
@@ -22,9 +23,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.viewModel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -46,7 +45,7 @@ class StatsFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var slug: String
     private lateinit var nameOfCountry: String
-    private val viewModel: CountryStatsViewModel by viewModels()
+    private val viewModel by viewModels<CountryStatsViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -132,11 +131,11 @@ class StatsFragment : Fragment() {
 
 @ExperimentalCoroutinesApi
 @Composable
-fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
+fun ViewForStats(viewModel: CountryStatsViewModel) {
     Row(Modifier.fillMaxHeight().fillMaxHeight()) {
-        ScrollableColumn(
+        Column(
             verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start,
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier.fillMaxHeight().verticalScroll(rememberScrollState())
         ) {
             viewModel.monthsToDisplay.forEachIndexed { index, month ->
                 val indexOfSelectedMonth = viewModel.displayedMonth.collectAsState()
@@ -144,19 +143,18 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
                     modifier = Modifier.padding(2.dp).selectable(
                         selected = (indexOfSelectedMonth.value == index),
                         onClick = { viewModel.monthClick(index) }
-                    ).width(60.dp),
+                    ).width(75.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
                         selected = (indexOfSelectedMonth.value == index),
                         onClick = { viewModel.monthClick(index) })
-                    Spacer(modifier = Modifier.width(2.dp))
-                    BasicText(text = month)
+                    BasicText(text = month, softWrap = false)
                 }
             }
         }
         val stats = viewModel.statsToDisplay.collectAsState()
-        ScrollableColumn(Modifier.fillMaxHeight().fillMaxWidth().padding(10.dp), verticalArrangement = Arrangement.Center) {
+        Column(Modifier.fillMaxHeight().fillMaxWidth().padding(10.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
             val statsCount = stats.value.size
             val oneBarHeight = 50
             Canvas(Modifier.fillMaxWidth().height((statsCount*oneBarHeight).dp)) {
@@ -202,13 +200,4 @@ fun ViewForStats(viewModel: CountryStatsViewModel = viewModel()) {
         }
     }
 
-}
-
-@ExperimentalCoroutinesApi
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    MaterialTheme {
-        ViewForStats()
-    }
 }

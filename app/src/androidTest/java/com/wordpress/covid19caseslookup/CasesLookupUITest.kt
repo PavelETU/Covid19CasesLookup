@@ -3,6 +3,8 @@ package com.wordpress.covid19caseslookup
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.wordpress.covid19caseslookup.androidframework.di.RepoModule
 import com.wordpress.covid19caseslookup.androidframework.di.RetrofitModule
+import com.wordpress.covid19caseslookup.plumbing.CasesLookupRules
+import com.wordpress.covid19caseslookup.plumbing.bddTestCase
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import kotlinx.coroutines.ExperimentalCoroutinesApi
